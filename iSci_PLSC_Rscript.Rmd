@@ -26,7 +26,7 @@ library(tidyverse)
 library(ExPosition)
 #install.packages('TInPosition') # if needed
 library(TExPosition)
-#library(TInPosition)
+library(TInPosition)
 library(PTCA4CATA)
 #devtools::install_github('HerveAbdi/data4PCCAR')
 library(data4PCCAR)
