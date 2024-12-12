@@ -1,6 +1,6 @@
 ---
 title: "ABCD-PLSC-Ap-GM-Rscript"
-author: "Taylor Jancetic and Chloe Hampson"
+author:"Chloe Hampson, Taylor Jancetic, Kirthana"
 date: "2024-09-30"
 output:
   html_document:
@@ -48,7 +48,7 @@ library(psych) # Psychometric tools
 covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/covariate.csv")
 socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/sociocult.csv")
 rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/rsfc.csv")
-phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
+# phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 ```
 
 ## Performing residualization 
@@ -73,47 +73,6 @@ View(Group1.X)
 
 
 ```{r}
-# Extract all the variables used in the model
-variables <- list(
-  interview_age = Group1.X$interview_age,
-  demo_sex_v2 = as.factor(Group1.X$demo_sex_v2),
-  demo_prnt_age_v2 = Group1.X$demo_prnt_age_v2,
-  demo_prnt_gender_id_v2 = as.factor(Group1.X$demo_prnt_gender_id_v2),
-  demo_prnt_ed_v2_2yr_l = Group1.X$demo_prnt_ed_v2_2yr_l,
-  demo_prtnr_ed_v2_2yr_l = Group1.X$demo_prtnr_ed_v2_2yr_l,
-  demo_comb_income_v2 = Group1.X$demo_comb_income_v2,
-  demo_prnt_income_v2_l = Group1.X$demo_prnt_income_v2_l,
-  mri_info_manufacturer = as.factor(Group1.X$mri_info_manufacturer),
-  rsfmri_meanmotion = Group1.X$rsfmri_meanmotion
-)
-
-# Function to check if a factor/numeric variable has at least 2 levels
-check_levels <- function(var) {
-  if (is.factor(var)) {
-    # Get levels and counts for factor
-    counts <- table(var)
-    has_at_least_2_levels <- length(counts) >= 2
-    return(list(has_at_least_2_levels = has_at_least_2_levels, counts = counts))
-  } else if (is.numeric(var)) {
-    # Get unique values and their counts for numeric
-    unique_vals <- unique(var[!is.na(var)])
-    counts <- table(var)
-    has_at_least_2_unique <- length(unique_vals) >= 2
-    return(list(has_at_least_2_unique = has_at_least_2_unique, counts = counts))
-  } else {
-    return(NA) # If not a factor or numeric, return NA
-  }
-}
-
-# Apply the function to all variables
-result <- sapply(variables, check_levels)
-
-# Print the result
-print(result)
-```
-
-
-```{r}
 # Multiple regression model
 lm.Group1 <- lm(Group1.Y ~ Group1.X$interview_age +
   as.factor(Group1.X$demo_sex_v2) +
@@ -135,28 +94,36 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 
 #### Measure goodness of fit
 
-```{r echo=TRUE, fig.height=10, fig.width=12}
-# for one outcome variable
-# plot(lm.Group1)
+```{r echo=TRUE}
+# Set the output directory and file name
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures/"
+fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
-# for matrix of outcome variables
-# loop the variables to obtain qq plot
+# Open the PNG device to save the plots
+png(fit_resi, height = 600, width = 1800) # Set dimensions in pixels
 
-for (i in 1:ncol(Group1_residuals)) {
-  qqnorm(Group1_residuals[, i], main = paste0("Q-Q plot for ", colnames(Group1_residuals)[i], sep = ""))
-  qqline(Group1_residuals[, i])
-}
+# Set up a 3x2 grid layout (3 rows, 2 columns)
+par(mfrow = c(1, 3))
 
-hist.data.frame(as.data.frame(Group1_residuals))
-# evaluation by predicton
+# Q-Q plot for residuals
+qqnorm(Group1_residuals[, 1], main = "Q-Q plot for RSFC residuals")
+qqline(Group1_residuals[, 1])
 
+# Histogram of residuals (using base hist function)
+hist(Group1_residuals[, 1], main = "Histogram of RSFC residuals", xlab = "Residuals", col = "lightblue")
+
+# Evaluation by prediction
 f1 <- fitted(lm.Group1)
 r1 <- residuals(lm.Group1)
 
+# Fitted vs residual plot
+plot(f1, r1, main = "Fitted vs. RSFC Residuals")
 
-for (i in 1:ncol(f1)) {
-  plot(f1[, i], r1[, i], main = paste0("fitted VS residual:   ", colnames(f1)[i], sep = ""))
-}
+# Reset plotting layout (optional)
+par(mfrow = c(1, 1))
+
+# Close the PNG device to save the plot
+dev.off()
 ```
 
 
@@ -184,22 +151,35 @@ Group2_residuals <- as.data.frame(lm.Group2$residuals)
 ```
 #### Measure goodness of fit
 
+
 ```{r echo=TRUE}
-for (i in 1:ncol(Group2_residuals)) {
-  qqnorm(Group2_residuals[, i], main = paste0("Q-Q plot for ", colnames(Group2_residuals)[i], sep = ""))
-  qqline(Group2_residuals[, i])
-}
+fit_resi <- paste0(fig_dir, "resi-fit_socio.png") # Correct file path with slash
 
-hist.data.frame(as.data.frame(Group2_residuals))
+# Open the PNG device to save the plots
+png(fit_resi, height = 600, width = 1800) # Set dimensions in pixels
 
-plot(fitted(lm.Group2), residuals(lm.Group2))
-f <- fitted(lm.Group2)
-r <- residuals(lm.Group2)
+# Set up a 1x3 grid
+par(mfrow = c(1, 3))
 
-# add linear smoother
-for (i in 1:ncol(f)) {
-  plot(f[, i], r[, i], main = paste0("fitted VS residual:   ", colnames(f)[i], sep = ""))
-}
+# Q-Q plot for residuals
+qqnorm(Group2_residuals[, 1], main = "Q-Q plot for Sociocultural residuals")
+qqline(Group2_residuals[, 1])
+
+# Histogram of residuals (using base hist function)
+hist(Group2_residuals[, 1], main = "Histogram of Sociocultural residuals", xlab = "Residuals", col = "lightblue")
+
+# Evaluation by prediction
+f2 <- fitted(lm.Group2)
+r2 <- residuals(lm.Group2)
+
+# Fitted vs residual plot
+plot(f2, r2, main = "Fitted vs. Sociocultural Residuals")
+
+# Reset plotting layout (optional)
+par(mfrow = c(1, 1))
+
+# Close the PNG device to save the plot
+dev.off()
 ```
 
 ## Setting up colors for Analysis
@@ -307,7 +287,20 @@ corrplot(XY.cor.pearson,
 #          col = colorRampPalette(c("darkred", "white","midnightblue"))(6))
 ```
 
+```{r}
+# Save the plot as a PNG file with higher resolution
+png("correlation_plot.png", width = 2800, height = 800, res = 300) # Increase res to 300 dpi
+corrplot(XY.cor.pearson,
+  method = "color", tl.cex = 0.2, tl.col = col4rsi, # Smaller text labels
+  addCoef.col = "black", number.digits = 2, number.cex = 0.12, # Smaller numbers
+  cl.pos = "b", cl.cex = 0.6, # Smaller legend text
+  title = "Pearson Correlation", mar = c(2, 2, 2, 2), # Smaller margins
+  addCoefasPercent = F, lwd = 0.1, # Thinner lines
+  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
+)
 
+dev.off() # Close the device
+```
 
 ### 2. Package details
 
@@ -337,17 +330,24 @@ k	: number of components to return.
 
 
 ```{r echo=TRUE}
-data.design <- df_covariates$site
+print(covar_df)
+# Extract design variable and ensure it's a factor (nominal)
+data.design <- as.factor(covar_df$mri_info_manufacturer)
 
-
-# make the design into a vector
+# Convert to a matrix for PLSC input
 data.design.vec <- as.matrix(data.design)
+rownames(data.design.vec) <- covar_df$src_subject_id
 
-rownames(data.design.vec) <- df_covariates$subjectkey
+# Run PLSC analysis
+pls.res <- tepPLS(
+  data1,
+  data2,
+  DESIGN = data.design,
+  make_design_nominal = TRUE,
+  graphs = FALSE
+)
 
-
-# Applying PLSC function to the prepped data
-pls.res <- tepPLS(data1, data2, DESIGN = data.design, make_design_nominal = TRUE, graphs = FALSE)
+summary(pls.res)
 ```
 
 ### 3. Scree Plot
@@ -363,10 +363,11 @@ nL <- min(ncol(data1), ncol(data2))
 
 
 # Applying permutation test to the input data for PLSC
+# should do 10000 iterations
 resPerm4PLSC <- perm4PLSC(data1, # First Data matrix
   data2, # Second Data matrix
   permType = "byColumns",
-  nIter = 10000 # How many iterations
+  nIter = 1000 # How many iterations
 )
 print(resPerm4PLSC)
 
