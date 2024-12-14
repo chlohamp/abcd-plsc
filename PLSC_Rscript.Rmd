@@ -38,6 +38,7 @@ library(gridExtra) # Arrange grid-based visualizations
 library(grid) # Low-level graphics system
 library(here) # Relative file paths
 library(psych) # Psychometric tools
+library(car)
 ```
 
 
@@ -45,9 +46,9 @@ library(psych) # Psychometric tools
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/sociocult.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/sociocult.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 ```
 
@@ -81,6 +82,8 @@ lm.Group1 <- lm(Group1.Y ~ Group1.X$interview_age +
   Group1.X$demo_prnt_ed_v2_2yr_l +
   Group1.X$demo_prtnr_ed_v2_2yr_l +
   Group1.X$demo_comb_income_v2 +
+  as.factor(Group1.X$demo_origin_v2) +
+  as.factor(Group1.X$site_id_l) +
   as.factor(Group1.X$mri_info_manufacturer) +
   Group1.X$rsfmri_meanmotion, na.action = na.omit)
 
@@ -96,7 +99,7 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 
 ```{r echo=TRUE}
 # Set the output directory and file name
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures-reduced/"
 fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
@@ -131,7 +134,6 @@ dev.off()
 
 ```{r echo=TRUE}
 Group2.Y <- as.matrix(socio_df)
-View(Group2.Y)
 
 
 lm.Group2 <- lm(Group2.Y ~ Group1.X$interview_age +
@@ -141,13 +143,18 @@ lm.Group2 <- lm(Group2.Y ~ Group1.X$interview_age +
   Group1.X$demo_prnt_ed_v2_2yr_l +
   Group1.X$demo_prtnr_ed_v2_2yr_l +
   Group1.X$demo_comb_income_v2 +
+  as.factor(Group1.X$demo_origin_v2) +
+  as.factor(Group1.X$site_id_l) +
   as.factor(Group1.X$mri_info_manufacturer) +
   Group1.X$rsfmri_meanmotion, na.action = na.omit)
 
 # keep if we decide this is how we want to deal with missing data #,na.action = na.omit)
+# Run VIF to check for multicollinearity
+summary(lm.Group2)
 
 Group2_residuals <- data.frame()
 Group2_residuals <- as.data.frame(lm.Group2$residuals)
+
 ```
 #### Measure goodness of fit
 
@@ -181,6 +188,59 @@ par(mfrow = c(1, 1))
 # Close the PNG device to save the plot
 dev.off()
 ```
+
+```{r}
+# Define the file path to save the Q-Q plot PNG
+fit_resi <- paste0(fig_dir, "qq-plots_residuals.png") # Correct file path with slash
+
+# Open the PNG device to save the plots
+png(fit_resi, height = 800, width = 1600) # Set dimensions in pixels
+
+# Set up the grid to display Q-Q plots in 2 rows
+par(mfrow = c(3, ceiling(ncol(Group2_residuals) / 3))) # 2 rows and adjust number of columns based on residuals
+
+# Loop through each column in Group2_residuals to create Q-Q plots
+for (i in 1:ncol(Group2_residuals)) {
+  # Q-Q plot for residuals
+  qqnorm(Group2_residuals[, i], main = paste0("Q-Q plot for ", colnames(Group2_residuals)[i]))
+  qqline(Group2_residuals[, i]) # Add the Q-Q line
+}
+
+# Reset plotting layout (optional)
+par(mfrow = c(1, 1))
+
+# Close the PNG device to save the plot
+dev.off()
+
+```
+
+```{r}
+# Define the file path to save the scatter plot PNG
+fit_resi <- paste0(fig_dir, "scatter-plots_residuals.png") # Correct file path with slash
+
+# Open the PNG device to save the plots
+png(fit_resi, height = 800, width = 1600) # Set dimensions in pixels
+
+# Set up the grid to display scatter plots in 2 rows
+par(mfrow = c(3, ceiling(ncol(Group2_residuals) / 3))) # 2 rows and adjust number of columns based on residuals
+
+# Loop through each column in Group2_residuals to create scatter plots
+for (i in 1:ncol(Group2_residuals)) {
+  # Scatter plot for residuals vs index (or fitted values, or another variable)
+  plot(Group2_residuals[, i],
+    main = paste0("Scatter plot for ", colnames(Group2_residuals)[i]),
+    xlab = "Index", ylab = "Residuals",
+    pch = 19, col = "blue"
+  )
+}
+
+# Reset plotting layout (optional)
+par(mfrow = c(1, 1))
+
+# Close the PNG device to save the plot
+dev.off()
+```
+
 
 ## Setting up colors for Analysis
 
@@ -259,7 +319,7 @@ col4row_age <- as.matrix(recode(col4row_age,
 
 ### 1. Correlation plots
 
-```{r fig.height= 5, fig.width=20, fig.align='center'}
+```{r}
 # Input data for PLSC
 data1 <- as.data.frame(Group1_residuals)
 data2 <- as.data.frame(Group2_residuals)
@@ -269,27 +329,10 @@ data2 <- as.data.frame(Group2_residuals)
 
 XY.cor.pearson <- cor(data2, data1)
 
-
-corrplot(XY.cor.pearson,
-  method = "color", tl.cex = 1, tl.col = col4rsi,
-  addCoef.col = "black", number.digits = 3, number.cex = .6,
-  cl.pos = "b", cl.cex = .7, title = "Pearson Correlation",
-  addCoefasPercent = F, mar = c(0, 0, 1, 0),
-  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
-)
-
-
-# XY.cor.kendall <- cor(data1, data2, method = "kendall")
-# corrplot(XY.cor.kendall, method = "color", tl.cex = 1, tl.col = col4rsi,
-#          addCoef.col = "black", number.digits = 3, number.cex = .6,
-#          cl.pos = 'b', cl.cex = .7, title = "Kendall Correlation",
-#          addCoefasPercent = F, mar=c(0,0,1,0),
-#          col = colorRampPalette(c("darkred", "white","midnightblue"))(6))
-```
-
-```{r}
 # Save the plot as a PNG file with higher resolution
-png("correlation_plot.png", width = 2800, height = 800, res = 300) # Increase res to 300 dpi
+corr <- paste0(fig_dir, "correlation_plot.png")
+
+'''png(corr, width = 2800, height = 800, res = 300) # Increase res to 300 dpi
 corrplot(XY.cor.pearson,
   method = "color", tl.cex = 0.2, tl.col = col4rsi, # Smaller text labels
   addCoef.col = "black", number.digits = 2, number.cex = 0.12, # Smaller numbers
@@ -297,9 +340,26 @@ corrplot(XY.cor.pearson,
   title = "Pearson Correlation", mar = c(2, 2, 2, 2), # Smaller margins
   addCoefasPercent = F, lwd = 0.1, # Thinner lines
   col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
-)
+)'''
 
+#for reduced
+# Create the plot
+png(corr, width = 1200, height = 800, res = 300) # Increase res to 300 dpi
+corrplot(XY.cor.pearson,
+  is.corr = FALSE, # Treat as raw data
+  method = "color",
+  col.lim = c(-0.2, 0.2), # Set color limits
+  tl.cex = 0.2, tl.col = "black", # Smaller text labels
+  addCoef.col = "black", number.digits = 3, number.cex = 0.17, # Smaller numbers
+  cl.pos = "b", cl.cex = 0.3, # Smaller legend text
+  title = "Pearson Correlation",
+  cex.main = 0.8, # Adjust title text size
+  mar = c(0, 0, 1, 0), # Smaller margins
+  addCoefasPercent = FALSE, lwd = 0.1, # Thinner lines
+  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
+)
 dev.off() # Close the device
+
 ```
 
 ### 2. Package details
@@ -330,9 +390,9 @@ k	: number of components to return.
 
 
 ```{r echo=TRUE}
-print(covar_df)
+
 # Extract design variable and ensure it's a factor (nominal)
-data.design <- as.factor(covar_df$mri_info_manufacturer)
+data.design <- as.factor(covar_df$side_id_l)
 
 # Convert to a matrix for PLSC input
 data.design.vec <- as.matrix(data.design)
@@ -371,38 +431,46 @@ resPerm4PLSC <- perm4PLSC(data1, # First Data matrix
 )
 print(resPerm4PLSC)
 
+```
+```{r}
+# Set the file path for saving the plot
+png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1000, height = 1200, res = 200)
 
-# obtaining the scree plot
+# Create the scree plot
 my.scree <- PlotScree(
   ev = pls.res$TExPosition.Data$eigs,
   title = "PLSC- Scree Plot",
   p.ev = resPerm4PLSC$pEigenvalues,
   plotKaiser = TRUE,
-  color4Kaiser = ggplot2::alpha("darkorchid4", .5),
+  color4Kaiser = ggplot2::alpha("darkorchid4", .5)
 )
 
+# Close the PNG device
+dev.off()
 
-my.scree
+```
 
 
+```{r}
+# Set the file path for saving the plot
+png(file.path(fig_dir, "Permutation_Test_Histogram.png"), width = 1000, height = 800, res = 100)
 
-# additional permutation histogram plots
-
-zeDim <- 1
-eigs <- resPerm4PLSC$permEigenvalues[, zeDim]
-obs <- as.numeric(resPerm4PLSC$fixedEigenvalues[zeDim])
+# Generate the histogram plot
 pH1 <- prettyHist(
   distribution = eigs,
   observed = obs,
-  xlim = c(0.002, 0.018), # needs to be set by hand
+  xlim = c(min(eigs), max(eigs)), # Automatically adjust xlim based on the data
   breaks = 30,
   border = "white",
   main = paste0("Permutation Test "),
-  xlab = paste0("Inertia of samples
-Latent dimension ", zeDim),
+  xlab = paste0("Inertia of samples\nLatent dimension ", zeDim),
   ylab = "Number of samples",
   counts = F
 )
+
+# Close the PNG device to save the plot
+dev.off()
+
 ```
 
 ### 4. Looking at the First Pair of Latent variables by site 
@@ -429,7 +497,7 @@ rownames(col4Means) <- rownames(lv.1.group)
 lv.1.group.boot <- Boot4Mean(latvar.1, data.design.vec)
 colnames(lv.1.group.boot$BootCube) <- c("Lx 1", "Ly 1")
 
-rownames(latvar.1) <- df_covariates$subjectkey
+rownames(latvar.1) <- covar_df$src_subject_id
 
 # plotiing the factor Maps
 plot.lv1 <- createFactorMap(latvar.1,
