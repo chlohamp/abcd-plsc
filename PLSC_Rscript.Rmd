@@ -39,6 +39,7 @@ library(grid) # Low-level graphics system
 library(here) # Relative file paths
 library(psych) # Psychometric tools
 library(car)
+library(kableExtra)
 ```
 
 
@@ -47,7 +48,7 @@ library(car)
 ```{r}
 # load datasets
 covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/sociocult.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/sociocult_8.csv")
 rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 ```
@@ -194,7 +195,7 @@ dev.off()
 fit_resi <- paste0(fig_dir, "qq-plots_residuals.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
-png(fit_resi, height = 800, width = 1600) # Set dimensions in pixels
+png(fit_resi, height = 800, width = 1200) # Set dimensions in pixels
 
 # Set up the grid to display Q-Q plots in 2 rows
 par(mfrow = c(3, ceiling(ncol(Group2_residuals) / 3))) # 2 rows and adjust number of columns based on residuals
@@ -219,7 +220,7 @@ dev.off()
 fit_resi <- paste0(fig_dir, "scatter-plots_residuals.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
-png(fit_resi, height = 800, width = 1600) # Set dimensions in pixels
+png(fit_resi, height = 800, width = 1200) # Set dimensions in pixels
 
 # Set up the grid to display scatter plots in 2 rows
 par(mfrow = c(3, ceiling(ncol(Group2_residuals) / 3))) # 2 rows and adjust number of columns based on residuals
@@ -240,79 +241,6 @@ par(mfrow = c(1, 1))
 # Close the PNG device to save the plot
 dev.off()
 ```
-
-
-## Setting up colors for Analysis
-
-```{r}
-# setting colors for RSI brain regions
-colors_brain <- c("pink", "blue", "yellow", "deeppink", "plum", "skyblue", "violet", "darkgreen")
-col4col_n0 <- as.matrix(c(colors_brain, colors_brain, colors_brain, colors_brain, "orange", "orange"))
-
-col4rsi <- col4col_n0
-
-
-# setting colors for air pollutants
-col4air <- c("#5f9ea0", "#305ABF", "#305ABF")
-
-col4column_rsi <- matrix(nrow = ncol(rsfc_df), ncol = 1)
-color.vec <- as.matrix(unique(colnames(rsfc_df)))
-for (i in 1:length(unique(colnames(rsfc_df)))) {
-  col4column_rsi[which(color.vec == (unique(colnames(rsfc_df)))[i])] <- col4rsi[i]
-}
-
-
-
-
-# colors set by site
-library(RColorBrewer)
-color_site <- brewer.pal(4, "PuOr")
-color_site <- colorRampPalette(color_site)(21)
-names(color_site) <- levels(unique(covar_df$site))
-colScale <- scale_colour_manual(name = "site", values = color_site)
-
-
-
-
-# Color for rows
-col4row <- matrix(nrow = nrow(covar_df), ncol = 1)
-
-for (i in 1:length(unique(covar_df$site))) {
-  col4row[which(covar_df$site == unique(covar_df$site)[i])] <- color_site[i]
-}
-
-
-# Colors set by area
-color_area <- brewer.pal(4, "PuOr")
-color_area <- colorRampPalette(color_area)(3)
-names(color_site) <- levels(unique(covar_df$reshist_addr1_urban_area))
-colScale <- scale_colour_manual(name = "area", values = color_site)
-
-col4row_area <- matrix(nrow = nrow(covar_df), ncol = 1)
-
-for (i in 1:length(unique(covar_df$reshist_addr1_urban_area))) {
-  col4row_area[which(covar_df$reshist_addr1_urban_area == unique(covar_df$reshist_addr1_urban_area)[i])] <- color_area[i]
-}
-
-
-col4row_sex <- covar_df$sex
-col4row_sex <- as.matrix(recode(col4row_sex,
-  "F" = "red",
-  "M" = "green",
-))
-
-# colors set by age
-df_covariates$age <- cut(covar_df$interview_age, breaks = c(0, 114, 120, 126, 133), labels = c("9-9.5 yrs", "9.5-10 yrs", "10-10.5 yrs", "10.5-11 yrs"))
-
-col4row_age <- covar_df$age
-col4row_age <- as.matrix(recode(col4row_age,
-  "9-9.5 yrs" = "red",
-  "9.5-10 yrs" = "plum",
-  "10-10.5 yrs" = "mediumorchid3",
-  "10.5-11 yrs" = "royalblue"
-))
-```
-
 
 
 ## PLSC Analysis
@@ -390,9 +318,12 @@ k	: number of components to return.
 
 
 ```{r echo=TRUE}
+print(colnames(covar_df)) # Print all column names to confirm the presence of site_id_l
+print(head(covar_df$site_id_l)) # Print the first few values of the site_id_l column
+
 
 # Extract design variable and ensure it's a factor (nominal)
-data.design <- as.factor(covar_df$side_id_l)
+data.design <- as.factor(covar_df$site_id_l)
 
 # Convert to a matrix for PLSC input
 data.design.vec <- as.matrix(data.design)
@@ -402,7 +333,7 @@ rownames(data.design.vec) <- covar_df$src_subject_id
 pls.res <- tepPLS(
   data1,
   data2,
-  DESIGN = data.design,
+  DESIGN = data.design.vec,
   make_design_nominal = TRUE,
   graphs = FALSE
 )
@@ -410,7 +341,7 @@ pls.res <- tepPLS(
 summary(pls.res)
 ```
 
-### 3. Scree Plot
+### 3. Number of Dimensions
 
 The scree plot shows a weird pattern because the null hypothesis is that there is no correlation between the tables (Null = 0) 
 Hence eigenvalues greater than zero become significant. 
@@ -418,66 +349,241 @@ Hence eigenvalues greater than zero become significant.
 The results of the permutation test gives us the eigenvalues.
 
 ```{r echo=TRUE}
-# no.of eigenvalues
-nL <- min(ncol(data1), ncol(data2))
-
 
 # Applying permutation test to the input data for PLSC
 # should do 10000 iterations
 resPerm4PLSC <- perm4PLSC(data1, # First Data matrix
   data2, # Second Data matrix
   permType = "byColumns",
-  nIter = 1000 # How many iterations
+  nIter = 10000 # How many iterations
 )
-print(resPerm4PLSC)
 
-```
-```{r}
 # Set the file path for saving the plot
-png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1000, height = 1200, res = 200)
+png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1200, height = 800, res = 100)
 
 # Create the scree plot
 my.scree <- PlotScree(
   ev = pls.res$TExPosition.Data$eigs,
-  title = "PLSC- Scree Plot",
   p.ev = resPerm4PLSC$pEigenvalues,
+  title = "PLSC- Scree Plot",
   plotKaiser = TRUE,
-  color4Kaiser = ggplot2::alpha("darkorchid4", .5)
+  col.ns = "black",
+  col.sig = "red")
+
+# Calculate and round eigenvalues to 2 decimal places
+eig <- t(round(pls.res$TExPosition.Data$eigs, 2)
 )
+# Create the names for the dimensions
+names <- paste0("dim", seq(1:8))
+# Create the table and print it explicitly
+eig_table <- kable(eig, col.names = names(pls.res$TExPosition.Data$eigs)) %>%
+  kable_styling()
+
+# Explicitly print the table to the console
+print(eig_table) # Ensure the table is printed
 
 # Close the PNG device
 dev.off()
-
 ```
 
-
 ```{r}
-# Set the file path for saving the plot
-png(file.path(fig_dir, "Permutation_Test_Histogram.png"), width = 1000, height = 800, res = 100)
+# Set the file path for saving the PNG
+png(file.path(fig_dir, "Perm_Histograms.png"), width = 3000, height = 800, res = 100)
 
-# Generate the histogram plot
-pH1 <- prettyHist(
-  distribution = eigs,
-  observed = obs,
-  xlim = c(min(eigs), max(eigs)), # Automatically adjust xlim based on the data
-  breaks = 30,
-  border = "white",
-  main = paste0("Permutation Test "),
-  xlab = paste0("Inertia of samples\nLatent dimension ", zeDim),
-  ylab = "Number of samples",
-  counts = F
-)
+# Set up the plotting layout for 3 plots in a row
+par(mfrow = c(1, 3)) # 1 row, 3 columns
+
+# Loop through the first 3 latent dimensions
+for (zeDim in 3:5) {
+  eigs <- resPerm4PLSC$permEigenvalues[, zeDim] # Permuted eigenvalues for the dimension
+  obs <- as.numeric(resPerm4PLSC$fixedEigenvalues[zeDim]) # Observed eigenvalue
+
+  # Generate the histogram for each dimension
+  prettyHist(
+    distribution = eigs,
+    observed = obs,
+    xlim = c(min(eigs), max(eigs)), # Automatically adjust xlim based on the data
+    breaks = 30,
+    border = "white",
+    main = paste0("Permutation Test - Latent Dim ", zeDim),
+    xlab = paste0("Inertia of samples\nLatent dimension ", zeDim),
+    ylab = "Number of samples",
+    counts = FALSE
+  )
+}
 
 # Close the PNG device to save the plot
 dev.off()
 
 ```
 
-### 4. Looking at the First Pair of Latent variables by site 
+### 4*. Score Plots 
+```{r}
+# function for correlations
+correlation_fn <- function(dimension) {
+  round(cor(pls.res$TExPosition.Data$lx[, dimension], pls.res$TExPosition.Data$ly[, dimension]), 3)
+}
+
+# use correlation function
+cor_1 <- correlation_fn(1)
+cor_2 <- correlation_fn(2)
+cor_3 <- correlation_fn(3)
+
+# function for plotting score plots
+plotScore_fn <- function(dimension, correlation) {
+  latvar <- cbind(pls.res$TExPosition.Data$lx[, dimension], pls.res$TExPosition.Data$ly[, dimension])
+  colnames(latvar) <- c(paste("Latent X dim", dimension), paste("Latent Y dim", dimension))
+  plot.lv <- createFactorMap(latvar, title = paste("correlation = ", correlation))
+  plot <- plot.lv$zeMap_background + plot.lv$zeMap_dots
+}
+
+# use function for first three dimensions
+score1 <- plotScore_fn(1, cor_1)
+score2 <- plotScore_fn(2, cor_2)
+score3 <- plotScore_fn(3, cor_3)
+
+# plot together
+Set the file path for saving the plot
+png(file.path(fig_dir, "Score_Plots.png"), width = 1800, height = 600, res = 200)
+
+# Plot together using grid.arrange
+grid.arrange(score1, score2, score3, nrow = 1)
+
+# Close the PNG device to save the file
+dev.off()
+
+```
+
+```{r}
+factor <- rbind(pls.res$TExPosition.Data$fi, pls.res$TExPosition.Data$fj)
+contributions <- rbind(pls.res$TExPosition.Data$ci, pls.res$TExPosition.Data$cj)
+
+# Create and save the Component plot as a PNG
+png(file.path(fig_dir, "Component_Plot.png"), width = 1000, height = 1000, res = 100)
+prettyPlot(factor,
+  contributionCircles = TRUE,
+  contributions = contributions,
+  xlab = "Component 1",
+  ylab = "Component 2",
+  main = "Component plot",
+  dev.new = F
+)
+dev.off() # Close the PNG device for this plot
+
+# Create and save the Component map X set plot as a PNG
+png(file.path(fig_dir, "Component_Map_X_Set.png"), width = 1000, height = 1000, res = 100)
+prettyPlot(pls.res$TExPosition.Data$fi,
+  contributionCircles = TRUE,
+  contributions = pls.res$TExPosition.Data$ci,
+  xlab = "Component 1",
+  ylab = "Component 2",
+  main = "Component map X set",
+  dev.new = F
+)
+dev.off() # Close the PNG device for this plot
+
+# Create and save the Component map Y set plot as a PNG
+png(file.path(fig_dir, "Component_Map_Y_Set.png"), width = 1000, height = 1000, res = 100)
+prettyPlot(pls.res$TExPosition.Data$fj,
+  contributionCircles = TRUE,
+  contributions = pls.res$TExPosition.Data$cj,
+  xlab = "Component 1",
+  ylab = "Component 2",
+  main = "Component map Y set",
+  dev.new = F
+)
+dev.off() # Close the PNG device for this plot
+
+```
+
+```{r}
+
+# get sign of contributions / saliences
+signed.X <- pls.res$TExPosition.Data$ci * sign(pls.res$TExPosition.Data$fi)
+signed.Y <- pls.res$TExPosition.Data$cj * sign(pls.res$TExPosition.Data$fj)
+
+# function for plotting salience plots
+plotSalience_fn <- function(set, dimension) {
+  PrettyBarPlot2(
+    bootratio = round(100 * set[, dimension]),
+    threshold = 100 / nrow(set),
+    plotnames = TRUE,
+    main = paste("Variable Factor loadings Dim", dimension),
+    ylab = "Variable Factor loadings"
+  )
+}
+ # Set the file path for saving the plot
+ png(file.path(fig_dir, "Salience_XDim1.png"), width = 1800, height = 1200, res = 200)
+
+ # Set up the layout to have 2 rows and 3 columns for the salience plots
+ par(mfrow = c(2, 3), mar = c(5, 4, 4, 2)) # Adjust margins as needed
+
+ # Plot salience for X (top row)
+ plotSalience_fn(signed.X, 1)
+
+
+ # Close the PNG device to save the file
+ dev.off()
+````
 
 
 ```{r}
+# Looking into what the resBootPLSC is giving us
+resBoot4PLSC <- Boot4PLSC(data1, # First Data matrix
+  data2, # Second Data matrix
+  nIter = 10000, # How many iterations
+  Fi = pls.res$TExPosition.Data$fi,
+  Fj = pls.res$TExPosition.Data$fj,
+  nf2keep = 2.5,
+  critical.value = 2.5,
+  # To be implemented later
+  # has no effect currently
+  alphaLevel = 1
+)
+
+resBoot4PLSC
+
+BR.I <- resBoot4PLSC$bootRatios.i
+BR.J <- resBoot4PLSC$bootRatios.j
+
+
+```
+
+```{r echo=TRUE}
+# bootstrap ratios for dimension 1
+laDim <- 1
+
+ba001.BR1.I <- PrettyBarPlot2(BR.I[, laDim],
+  threshold = 3,
+  font.size = 4,
+  ylab = "Bootstrap ratios"
+  # ylim = c(1.2*min(BR[,laDim]), 1.2*max(BR[,laDim]))
+) + ggtitle(paste0("Component ", laDim), subtitle = "Table 1")
+
+ba002.BR1.J <- PrettyBarPlot2(BR.J[, laDim],
+  threshold = 3,
+  font.size = 4,
+  ylab = "Bootstrap ratios"
+  # ylim = c(1.2*min(BR[,laDim]), 1.2*max(BR[,laDim]))
+) + ggtitle(paste0("Component ", laDim), subtitle = "Table 2")
+
+ba001.BR1.I
+ba002.BR1.J
+```
+
+################################################################ END ########################################################
+
+### 4. Looking at the First Pair of Latent variables by site 
+
+```{r}
 # ploting the first latent variable of data1(X) and first latent variables of data2(Y). We are tryingto see if these two latent variables are similar or not.
+
+# Extract design variable and ensure it's a factor (nominal)
+data.design <- as.factor(covar_df$site_id_l)
+
+# Convert to a matrix for PLSC input
+data.design.vec <- as.matrix(data.design)
+rownames(data.design.vec) <- covar_df$src_subject_id
 
 # first pair of latent variables:
 
@@ -485,10 +591,94 @@ latvar.1 <- cbind(
   pls.res$TExPosition.Data$lx[, 1],
   pls.res$TExPosition.Data$ly[, 1]
 )
+table(data.design.vec)
+
 colnames(latvar.1) <- c("Lx 1", "Ly 1")
 
 # compute means
 lv.1.group <- getMeans(latvar.1, data.design.vec)
+
+# Assuming the data.design and latent variables (latvar.1) are already correctly set up
+
+# Remove the color_site and related assignments
+# col4Means <- as.matrix(color_site)  # This line can be removed
+# rownames(col4Means) <- rownames(lv.1.group)  # This line can be removed
+
+# You can assign a simple color (e.g., black) if you still need color
+# If no color is needed, you can skip the col.points argument entirely
+col4Means <- rep("black", nrow(lv.1.group))
+
+# Compute bootstrap - for confidence intervals
+lv.1.group.boot <- Boot4Mean(latvar.1, data.design.vec)
+colnames(lv.1.group.boot$BootCube) <- c("Lx 1", "Ly 1")
+
+# Ensure that row names are set to the correct subject IDs
+rownames(latvar.1) <- covar_df$src_subject_id
+
+```
+
+```{r}
+# Define the file path for saving the plot
+factor_map <- paste0(fig_dir, "/factormap.png") # Ensure the slash before the file name
+
+# Open the PNG device to save the plots with the specified dimensions
+png(factor_map, height = 800, width = 1200, res = 100)
+
+# Plotting your factor map
+plot.lv1 <- createFactorMap(latvar.1,
+  col.points = col4Means, # Assign color to points
+  col.labels = col4Means, # Assign color to labels
+  alpha.points = 0.7,
+  force = 0.01
+)
+
+# Print the combined factor map components
+print(plot.lv1$zeMap_background) # Plot background map
+print(plot.lv1$zeMap_dots) # Plot points map
+print(plot.lv1$zeMap_text) # Plot labels map
+
+# Close the PNG device to save the file
+dev.off() # Finalize and save the plot
+
+
+
+```
+
+
+plot1.mean <- createFactorMap(lv.1.group,
+  col.points = col4Means, # Now using black for group means
+  col.labels = col4Means, # Same for labels
+  cex = 4,
+  pch = 17,
+  force = 0.1,
+  alpha.points = 0.8
+)
+
+plot1.meanCI <- MakeCIEllipses(lv.1.group.boot$BootCube[, c(1:2), ], # Get the first two components
+  col = col4Means[rownames(lv.1.group.boot$BootCube)],
+  names.of.factors = c("Lx 1", "Ly 1")
+)
+
+plot1 <- plot.lv1$zeMap_background + plot.lv1$zeMap_dots + plot.lv1$zeMap_text + plot1.mean$zeMap_dots + plot1.mean$zeMap_text + plot1.meanCI
+plot1
+
+# Check for outliers
+outlier <- subset(latvar.1, rowSums(latvar.1 > 0.3) > 0)
+
+# Get the indices of outliers
+indx <- which(rownames(latvar.1) == rownames(outlier))
+print(rownames(outlier))
+
+```
+
+
+```{r}
+
+colnames(latvar.1) <- c("Lx 1", "Ly 1")
+
+# compute means
+lv.1.group <- getMeans(latvar.1, data.design.vec)
+print(lv.1.group)
 
 col4Means <- as.matrix(color_site)
 rownames(col4Means) <- rownames(lv.1.group)
@@ -497,7 +687,7 @@ rownames(col4Means) <- rownames(lv.1.group)
 lv.1.group.boot <- Boot4Mean(latvar.1, data.design.vec)
 colnames(lv.1.group.boot$BootCube) <- c("Lx 1", "Ly 1")
 
-rownames(latvar.1) <- covar_df$src_subject_id
+rownames(latvar.1) <- df_covariates$subjectkey
 
 # plotiing the factor Maps
 plot.lv1 <- createFactorMap(latvar.1,
@@ -529,6 +719,7 @@ outlier <- subset(latvar.1, rowSums(latvar.1 > 0.3) > 0)
 
 indx <- which(rownames(latvar.1) == rownames(outlier))
 print(rownames(outlier))
+
 ```
 
 ### 5. Obtaining Column factor scores
