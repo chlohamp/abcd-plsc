@@ -47,9 +47,9 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/sociocult_8.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives-reduced/rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/sociocult.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 ```
 
@@ -100,7 +100,7 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 
 ```{r echo=TRUE}
 # Set the output directory and file name
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures-reduced/"
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures/"
 fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
@@ -260,20 +260,12 @@ XY.cor.pearson <- cor(data2, data1)
 # Save the plot as a PNG file with higher resolution
 corr <- paste0(fig_dir, "correlation_plot.png")
 
-'''png(corr, width = 2800, height = 800, res = 300) # Increase res to 300 dpi
-corrplot(XY.cor.pearson,
-  method = "color", tl.cex = 0.2, tl.col = col4rsi, # Smaller text labels
-  addCoef.col = "black", number.digits = 2, number.cex = 0.12, # Smaller numbers
-  cl.pos = "b", cl.cex = 0.6, # Smaller legend text
-  title = "Pearson Correlation", mar = c(2, 2, 2, 2), # Smaller margins
-  addCoefasPercent = F, lwd = 0.1, # Thinner lines
-  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
-)'''
 
-#for reduced
 # Create the plot
 png(corr, width = 1200, height = 800, res = 300) # Increase res to 300 dpi
-corrplot(XY.cor.pearson,
+
+# for reduced
+'''corrplot(XY.cor.pearson,
   is.corr = FALSE, # Treat as raw data
   method = "color",
   col.lim = c(-0.2, 0.2), # Set color limits
@@ -284,6 +276,22 @@ corrplot(XY.cor.pearson,
   cex.main = 0.8, # Adjust title text size
   mar = c(0, 0, 1, 0), # Smaller margins
   addCoefasPercent = FALSE, lwd = 0.1, # Thinner lines
+  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
+)
+dev.off() ''' # Close the device
+
+
+# for full
+corrplot(XY.cor.pearson,
+  is.corr = FALSE, # Treat as raw data
+  method = "color",
+  col.lim = c(-0.25, 0.25), # Set color limits
+  tl.cex = 0.2, tl.col = "black", # Smaller text labels
+  cl.pos = "b", cl.cex = 0.3, # Smaller legend text
+  title = "Pearson Correlation",
+  cex.main = 0.8, # Adjust title text size
+  mar = c(0, 0, 1, 0), # Smaller margins
+  lwd = 0.1, # Thinner lines
   col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
 )
 dev.off() # Close the device
@@ -357,7 +365,7 @@ resPerm4PLSC <- perm4PLSC(data1, # First Data matrix
   permType = "byColumns",
   nIter = 10000 # How many iterations
 )
-
+print(resPerm4PLSC)
 # Set the file path for saving the plot
 png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1200, height = 800, res = 100)
 
@@ -365,7 +373,7 @@ png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1200, height = 800, res =
 my.scree <- PlotScree(
   ev = pls.res$TExPosition.Data$eigs,
   p.ev = resPerm4PLSC$pEigenvalues,
-  title = "PLSC- Scree Plot",
+  title = "PLSC Scree Plot",
   plotKaiser = TRUE,
   col.ns = "black",
   col.sig = "red")
@@ -373,14 +381,17 @@ my.scree <- PlotScree(
 # Calculate and round eigenvalues to 2 decimal places
 eig <- t(round(pls.res$TExPosition.Data$eigs, 2)
 )
+peig <- t(resPerm4PLSC$pEigenvalues)
 # Create the names for the dimensions
-names <- paste0("dim", seq(1:8))
+names <- paste0("dim", seq(1:20))
 # Create the table and print it explicitly
 eig_table <- kable(eig, col.names = names(pls.res$TExPosition.Data$eigs)) %>%
   kable_styling()
-
+peig_table <- kable(peig, col.names = names(resPerm4PLSC$pEigenvalues)) %>%
+  kable_styling()
 # Explicitly print the table to the console
 print(eig_table) # Ensure the table is printed
+print(peig_table)
 
 # Close the PNG device
 dev.off()
@@ -425,9 +436,9 @@ correlation_fn <- function(dimension) {
 }
 
 # use correlation function
-cor_1 <- correlation_fn(1)
 cor_2 <- correlation_fn(2)
 cor_3 <- correlation_fn(3)
+cor_4 <- correlation_fn(4)
 
 # function for plotting score plots
 plotScore_fn <- function(dimension, correlation) {
@@ -438,16 +449,16 @@ plotScore_fn <- function(dimension, correlation) {
 }
 
 # use function for first three dimensions
-score1 <- plotScore_fn(1, cor_1)
 score2 <- plotScore_fn(2, cor_2)
 score3 <- plotScore_fn(3, cor_3)
+score4 <- plotScore_fn(4, cor_4)
 
 # plot together
-Set the file path for saving the plot
+# Set the file path for saving the plot
 png(file.path(fig_dir, "Score_Plots.png"), width = 1800, height = 600, res = 200)
 
 # Plot together using grid.arrange
-grid.arrange(score1, score2, score3, nrow = 1)
+grid.arrange(score2, score3, score4, nrow = 1)
 
 # Close the PNG device to save the file
 dev.off()
@@ -513,16 +524,17 @@ plotSalience_fn <- function(set, dimension) {
   )
 }
  # Set the file path for saving the plot
- png(file.path(fig_dir, "Salience_XDim1.png"), width = 1800, height = 1200, res = 200)
+ png(file.path(fig_dir, "Salience_XDim4.png"), width = 1800, height = 1200, res = 200)
 
- # Set up the layout to have 2 rows and 3 columns for the salience plots
- par(mfrow = c(2, 3), mar = c(5, 4, 4, 2)) # Adjust margins as needed
-
- # Plot salience for X (top row)
- plotSalience_fn(signed.X, 1)
-
+ plotSalience_fn(signed.X, 4)
 
  # Close the PNG device to save the file
+ dev.off()
+
+  png(file.path(fig_dir, "Salience_YDim4.png"), width = 1800, height = 1200, res = 200)
+
+ plotSalience_fn(signed.Y, 4)
+ 
  dev.off()
 ````
 
@@ -534,11 +546,11 @@ resBoot4PLSC <- Boot4PLSC(data1, # First Data matrix
   nIter = 10000, # How many iterations
   Fi = pls.res$TExPosition.Data$fi,
   Fj = pls.res$TExPosition.Data$fj,
-  nf2keep = 2.5,
+  nf2keep = 5, #determines number of dimensions that go into bootstrap
   critical.value = 2.5,
   # To be implemented later
   # has no effect currently
-  alphaLevel = 1
+  alphaLevel = 0.5
 )
 
 resBoot4PLSC
@@ -546,29 +558,33 @@ resBoot4PLSC
 BR.I <- resBoot4PLSC$bootRatios.i
 BR.J <- resBoot4PLSC$bootRatios.j
 
-
-```
-
-```{r echo=TRUE}
 # bootstrap ratios for dimension 1
-laDim <- 1
+laDim <- 4
 
-ba001.BR1.I <- PrettyBarPlot2(BR.I[, laDim],
+# Save the plot for BR.I (Component plot)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim4.png"), width = 1800, height = 1200, res = 200)
+PrettyBarPlot2(BR.I[, laDim],
   threshold = 3,
   font.size = 4,
   ylab = "Bootstrap ratios"
   # ylim = c(1.2*min(BR[,laDim]), 1.2*max(BR[,laDim]))
 ) + ggtitle(paste0("Component ", laDim), subtitle = "Table 1")
+dev.off() # Close the PNG device for BR.I
 
-ba002.BR1.J <- PrettyBarPlot2(BR.J[, laDim],
+# Save the plot for BR.J (Component plot)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim4.png"), width = 1800, height = 1200, res = 200)
+PrettyBarPlot2(BR.J[, laDim],
   threshold = 3,
   font.size = 4,
   ylab = "Bootstrap ratios"
   # ylim = c(1.2*min(BR[,laDim]), 1.2*max(BR[,laDim]))
 ) + ggtitle(paste0("Component ", laDim), subtitle = "Table 2")
+dev.off() # Close the PNG device for BR.J
+```
 
-ba001.BR1.I
-ba002.BR1.J
+```{r echo=TRUE}
+
+
 ```
 
 ################################################################ END ########################################################
