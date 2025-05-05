@@ -47,10 +47,13 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/sociocult.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/sociocult.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
+
+
+
 ```
 
 ## Performing residualization 
@@ -100,7 +103,7 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 
 ```{r echo=TRUE}
 # Set the output directory and file name
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/figures/"
 fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
@@ -264,21 +267,6 @@ corr <- paste0(fig_dir, "correlation_plot.png")
 # Create the plot
 png(corr, width = 1200, height = 800, res = 300) # Increase res to 300 dpi
 
-# for reduced
-'''corrplot(XY.cor.pearson,
-  is.corr = FALSE, # Treat as raw data
-  method = "color",
-  col.lim = c(-0.2, 0.2), # Set color limits
-  tl.cex = 0.2, tl.col = "black", # Smaller text labels
-  addCoef.col = "black", number.digits = 3, number.cex = 0.17, # Smaller numbers
-  cl.pos = "b", cl.cex = 0.3, # Smaller legend text
-  title = "Pearson Correlation",
-  cex.main = 0.8, # Adjust title text size
-  mar = c(0, 0, 1, 0), # Smaller margins
-  addCoefasPercent = FALSE, lwd = 0.1, # Thinner lines
-  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
-)
-dev.off() ''' # Close the device
 
 
 # for full
@@ -298,8 +286,35 @@ dev.off() # Close the device
 
 ```
 
+# for reduced
+"""corrplot(XY.cor.pearson,
+  is.corr = FALSE, # Treat as raw data
+  method = "color",
+  col.lim = c(-0.2, 0.2), # Set color limits
+  tl.cex = 0.2, tl.col = "black", # Smaller text labels
+  addCoef.col = "black", number.digits = 3, number.cex = 0.17, # Smaller numbers
+  cl.pos = "b", cl.cex = 0.3, # Smaller legend text
+  title = "Pearson Correlation",
+  cex.main = 0.8, # Adjust title text size
+  mar = c(0, 0, 1, 0), # Smaller margins
+  addCoefasPercent = FALSE, lwd = 0.1, # Thinner lines
+  col = colorRampPalette(c("darkred", "white", "midnightblue"))(6)
+)""" # Close the device
+
 ### 2. Package details
 
+```{r}
+tepPLS(data1, data2,
+  center1 = TRUE,
+  scale1 = "SS1",
+  center2 = TRUE,
+  scale2 = "SS1",
+  DESIGN = NULL,
+  make_design_nominal = TRUE,
+  graphs = TRUE,
+  k = 0
+)
+```
 
 tepPLS(DATA1, DATA2, center1 = TRUE, scale1 = "SS1", center2 = TRUE, scale2 = "SS1", DESIGN = NULL, make_design_nominal = TRUE, graphs = TRUE, k = 0)
 
@@ -326,10 +341,6 @@ k	: number of components to return.
 
 
 ```{r echo=TRUE}
-print(colnames(covar_df)) # Print all column names to confirm the presence of site_id_l
-print(head(covar_df$site_id_l)) # Print the first few values of the site_id_l column
-
-
 # Extract design variable and ensure it's a factor (nominal)
 data.design <- as.factor(covar_df$site_id_l)
 
@@ -357,6 +368,8 @@ Hence eigenvalues greater than zero become significant.
 The results of the permutation test gives us the eigenvalues.
 
 ```{r echo=TRUE}
+# no.of eigenvalues
+nL <- min(ncol(data1), ncol(data2))
 
 # Applying permutation test to the input data for PLSC
 # should do 10000 iterations
@@ -366,6 +379,20 @@ resPerm4PLSC <- perm4PLSC(data1, # First Data matrix
   nIter = 10000 # How many iterations
 )
 print(resPerm4PLSC)
+
+```
+
+```{r}
+scree_df <- data.frame(row.names = colnames(socio_df))
+scree_df$eigens <- pls.res$TExPosition.Data$eigs
+scree_df$pEigens <- resPerm4PLSC$pEigenvalues
+
+
+write.csv(
+  scree_df,
+  file = paste0(fig_dir, "/rest-scree_values_", resPerm4PLSC$pOmnibus, "-components.csv")
+)
+
 # Set the file path for saving the plot
 png(file.path(fig_dir, "PLSC_Scree_Plot.png"), width = 1200, height = 800, res = 100)
 
@@ -376,11 +403,11 @@ my.scree <- PlotScree(
   title = "PLSC Scree Plot",
   plotKaiser = TRUE,
   col.ns = "black",
-  col.sig = "red")
+  col.sig = "red"
+)
 
 # Calculate and round eigenvalues to 2 decimal places
-eig <- t(round(pls.res$TExPosition.Data$eigs, 2)
-)
+eig <- t(round(pls.res$TExPosition.Data$eigs, 2))
 peig <- t(resPerm4PLSC$pEigenvalues)
 # Create the names for the dimensions
 names <- paste0("dim", seq(1:20))
@@ -428,7 +455,7 @@ dev.off()
 
 ```
 
-### 4*. Score Plots 
+### 4*. Score Plots ??? line 501
 ```{r}
 # function for correlations
 correlation_fn <- function(dimension) {
@@ -436,9 +463,9 @@ correlation_fn <- function(dimension) {
 }
 
 # use correlation function
-cor_2 <- correlation_fn(2)
 cor_3 <- correlation_fn(3)
 cor_4 <- correlation_fn(4)
+cor_5 <- correlation_fn(5)
 
 # function for plotting score plots
 plotScore_fn <- function(dimension, correlation) {
@@ -449,16 +476,16 @@ plotScore_fn <- function(dimension, correlation) {
 }
 
 # use function for first three dimensions
-score2 <- plotScore_fn(2, cor_2)
 score3 <- plotScore_fn(3, cor_3)
 score4 <- plotScore_fn(4, cor_4)
+score5 <- plotScore_fn(5, cor_5)
 
 # plot together
 # Set the file path for saving the plot
 png(file.path(fig_dir, "Score_Plots.png"), width = 1800, height = 600, res = 200)
 
 # Plot together using grid.arrange
-grid.arrange(score2, score3, score4, nrow = 1)
+grid.arrange(score3, score4, score5, nrow = 1)
 
 # Close the PNG device to save the file
 dev.off()
@@ -524,21 +551,155 @@ plotSalience_fn <- function(set, dimension) {
   )
 }
  # Set the file path for saving the plot
- png(file.path(fig_dir, "Salience_XDim4.png"), width = 1800, height = 1200, res = 200)
+ png(file.path(fig_dir, "Salience_XDim3.png"), width = 1800, height = 1200, res = 200)
 
- plotSalience_fn(signed.X, 4)
+ plotSalience_fn(signed.X, 3)
 
  # Close the PNG device to save the file
  dev.off()
 
-  png(file.path(fig_dir, "Salience_YDim4.png"), width = 1800, height = 1200, res = 200)
+  png(file.path(fig_dir, "Salience_YDim3.png"), width = 1800, height = 1200, res = 200)
 
- plotSalience_fn(signed.Y, 4)
+ plotSalience_fn(signed.Y, 3)
  
  dev.off()
 ````
 
+```{r}
+### 5. Obtaining Column factor scores
 
+# {r echo=TRUE}
+### Column Factor scores of the 1st component of data1 representing RSI measures and data2 representing air pollutants
+
+# Fi:column factor scores for data1(RSI measures) or
+# Loadings of data1(RSI measures)
+Fi <- pls.res$TExPosition.Data$fi
+
+# Fi:column factor scores for data2(Air pollutants exposure)
+# or Loadings of data2(air pollutants exposure)
+Fj <- pls.res$TExPosition.Data$fj
+
+# Generating loadings map of Fi
+p.loadings <- createFactorMap(Fi,
+  axis1 = 1,
+  axis2 = 2,
+  display.points = TRUE,
+  display.labels = TRUE,
+  title = "Loadings of Columns RSI",
+  pch = 20,
+  cex = 3,
+  text.cex = 3,
+)
+
+label4map <- createxyLabels.gen(
+  x_axis = 1, y_axis = 2,
+  lambda = pls.res$TExPosition.Data$eigs,
+  tau = pls.res$TExPosition.Data$t
+)
+
+p.plot <- p.loadings$zeMap + label4map
+p.plot
+ggsave(p.plot,
+  file = paste(fig_dir, "rni-brain_factors-components.png",
+    sep = "/"
+  ),
+  width = 10, height = 10, units = "in", dpi = 600
+)
+
+# Generating loadings map of Fj
+
+q.loadings <- createFactorMap(Fj,
+  axis1 = 1,
+  axis2 = 2,
+  display.points = TRUE,
+  display.labels = TRUE,
+  title = "Loadings of Columns Sociocult",
+  pch = 20,
+  cex = 3,
+  text.cex = 4,
+)
+
+label4map <- createxyLabels.gen(
+  x_axis = 1, y_axis = 2,
+  lambda = pls.res$TExPosition.Data$eigs,
+  tau = pls.res$TExPosition.Data$t
+)
+
+q.plot <- q.loadings$zeMap + label4map
+q.plot
+ggsave(q.plot,
+  file = paste(fig_dir, "rni-air_factors-components.png",
+    sep = "/"
+  ),
+  width = 10, height = 10, units = "in", dpi = 600
+)
+```
+
+
+### 5. Column Loadings
+
+# These are the loadings obtained after performing SVD(R) on correlation matrix.
+
+
+# {r echo=TRUE}
+
+# generating bar plots for loadings of RSI data table
+```{r}
+P.data1 <- pls.res$TExPosition.Data$pdq$p
+
+
+plot_P.data1 <- PrettyBarPlot2(
+  bootratio = P.data1[, 1],
+  threshold = 0,
+  ylim = NULL,
+  color4ns = "gray75",
+  plotnames = TRUE,
+  main = "Loadings of RSI variables",
+  ylab = " P Loadings ",
+  horizontal = TRUE
+)
+
+plot_P.data1
+ggsave(plot_P.data1,
+  file = paste(proj_dir, figs_dir, "rni-brain_P-components.png",
+    sep = "/"
+  ),
+  width = 10, height = 10, units = "in", dpi = 600
+)
+
+# generating bar plots for loadings of Air pollutants data table
+Q.data2 <- pls.res$TExPosition.Data$pdq$q
+
+
+plot_Q.data2 <- PrettyBarPlot2(
+  bootratio = Q.data2[, 1],
+  threshold = 0,
+  ylim = NULL,
+  color4ns = "white",
+  plotnames = TRUE,
+  main = "Loadings of sociocult variables",
+  ylab = " Q Loadings "
+)
+
+plot_Q.data2
+ggsave(plot_Q.data2,
+  file = paste(proj_dir, figs_dir, "rni-air_Q-components.png",
+    sep = "/"
+  ),
+  width = 10, height = 10, units = "in", dpi = 600
+)
+```
+
+```{r}
+# generating bar plots for loadings of Air pollutants data table
+Q.data2 <- pls.res$TExPosition.Data$pdq$q
+# generating bar plots for loadings of RSI data table
+P.data1 <- pls.res$TExPosition.Data$pdq$p
+
+# saving the loading table into excel file.
+socio_loadings <- as.data.frame(Q.data2)
+rest_loadings <- as.data.frame(P.data1)
+```
 ```{r}
 # Looking into what the resBootPLSC is giving us
 resBoot4PLSC <- Boot4PLSC(data1, # First Data matrix
@@ -555,14 +716,53 @@ resBoot4PLSC <- Boot4PLSC(data1, # First Data matrix
 
 resBoot4PLSC
 
+```
+
+```{r}
+
 BR.I <- resBoot4PLSC$bootRatios.i
 BR.J <- resBoot4PLSC$bootRatios.j
 
-# bootstrap ratios for dimension 1
-laDim <- 4
+
+# saving the bootstrap rations into excel
+
+air_bootstrap <- as.data.frame(BR.J)
+rni_bootstrap <- as.data.frame(BR.I)
+
+air_res <- cbind.data.frame(socio_loadings, air_bootstrap)
+rni_res <- cbind.data.frame(rest_loadings, rni_bootstrap)
+
+write.csv(air_res, paste(fig_dir,
+  "rni-sociocult_Q-components.csv",
+  sep = "/"
+), row.names = TRUE)
+
+write.csv(rni_res, paste(fig_dir,
+  "rni-brain_P-components.csv",
+  sep = "/"
+), row.names = TRUE)
+
+```
+
+```{r}
+
+print(resPerm4PLSC$pOmnibus)
+```
+
+if (resPerm4PLSC$pOmnibus < 0.01)
+  for (i in seq_along(resPerm4PLSC$pEigenvalues))
+    if (resPerm4PLSC$pEigenvalues[i] < 0.01)
+      laDim <- i
+      print(laDim)
+
+```
+
+```{r}
+# bootstrap ratios 
+laDim <- 3
 
 # Save the plot for BR.I (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim4.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim3.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.I[, laDim],
   threshold = 3,
   font.size = 4,
@@ -572,7 +772,7 @@ PrettyBarPlot2(BR.I[, laDim],
 dev.off() # Close the PNG device for BR.I
 
 # Save the plot for BR.J (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim4.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim3.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.J[, laDim],
   threshold = 3,
   font.size = 4,
@@ -581,6 +781,7 @@ PrettyBarPlot2(BR.J[, laDim],
 ) + ggtitle(paste0("Component ", laDim), subtitle = "Table 2")
 dev.off() # Close the PNG device for BR.J
 ```
+
 
 ```{r echo=TRUE}
 
@@ -824,7 +1025,7 @@ plot_P.data1 <- PrettyBarPlot2(
 
 plot_P.data1
 
-# generating bar plots for loadings of Air pollutants data table
+# generating bar plots for loadings of socio cultural data table
 Q.data2 <- pls.res$TExPosition.Data$pdq$q
 
 
@@ -844,12 +1045,16 @@ plot_Q.data2 <- PrettyBarPlot2(
 plot_Q.data2
 
 # saving the loading table into excel file.
+socio_loadings <- as.data.frame(Q.data2)
+rest_loadings <- as.data.frame(P.data1)
+
+'''# saving the loading table into excel file.
 df_loadings <- as.data.frame(c(P.data1[, 1], Q.data2[, 1]))
 
 names(df_loadings) <- "Loadings(Dim1)"
 df_loadings <- cbind(" " = rownames(df_loadings), df_loadings)
 library("writexl")
-write_xlsx(df_loadings, "D:\\USC\\Project1_4.0\\Analysis\\loadings_dim1.xlsx")
+write_xlsx(df_loadings, "D:\\USC\\Project1_4.0\\Analysis\\loadings_dim1.xlsx")'''
 ```
 
 ### 6. Inference Bootstrap
