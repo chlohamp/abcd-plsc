@@ -27,7 +27,7 @@ for (network in networks) {
     data <- read.table(file = data_path, sep = ",", header = TRUE)
 
     for (phyhealth_var in phyhealth_vars) {
-        all_columns <- c(roi, categorical_vars, numerical_vars, phyhealth_var, "site_id_l")
+        all_columns <- c(roi, categorical_vars, numerical_vars, phyhealth_var, "site_id_l", "rel_family_id")
         sub_data <- data[, all_columns]
         sub_data <- na.omit(sub_data)
 
