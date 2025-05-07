@@ -6,8 +6,8 @@ networks <- c("cgc-dt", "dt-dla", "dt-dt")
 roi <- "rsfc"
 
 # Level-1 Predictors
-categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2") # , "mri_info_manufacturer"
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2") # , "rsfmri_meanmotion"
 phyhealth_vars <- c(
     "mctq_sdweek_calc",
     "mctq_msfsc_calc",
@@ -21,6 +21,8 @@ phyhealth_vars <- c(
     "cbcl_scr_syn_internal_t",
     "cbcl_scr_syn_external_t"
 )
+
+phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
 
 for (network in networks) {
     data_path <- paste0(data_dir, "phyhealth_", network, "_data.csv")
@@ -41,13 +43,19 @@ for (network in networks) {
             sub_data[[var]] <- scale(sub_data[[var]], center = TRUE, scale = TRUE)
         }
 
-        sub_data[[phyhealth_var]] <- scale(sub_data[[phyhealth_var]], center = TRUE, scale = TRUE)
+        if (phyhealth_var %in% phyhealth_cats) {
+            sub_data[[phyhealth_var]] <- factor(sub_data[[phyhealth_var]])
+        } else {
+            sub_data[[phyhealth_var]] <- scale(sub_data[[phyhealth_var]],
+                center = TRUE, scale = TRUE
+            )
+        }
 
         # Fixed effects formula
         fixed_effects <- paste(c(numerical_vars, categorical_vars), collapse = " + ")
 
         # Full model
-        equation_lme <- paste(roi, "~", fixed_effects, "+", phyhealth_var, "+ (1|site_id_l)")
+        equation_lme <- paste(roi, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)")
 
         # Run the full model
         model <- lmer(as.formula(equation_lme), data = sub_data)
