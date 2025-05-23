@@ -47,11 +47,13 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/sociocult.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/sociocult.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/figures/"
+out_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced"
 
 
 ```
@@ -103,7 +105,7 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 
 ```{r echo=TRUE}
 # Set the output directory and file name
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/figures/"
 fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
@@ -551,16 +553,16 @@ plotSalience_fn <- function(set, dimension) {
   )
 }
  # Set the file path for saving the plot
- png(file.path(fig_dir, "Salience_XDim3.png"), width = 1800, height = 1200, res = 200)
+ png(file.path(fig_dir, "Salience_XDim1.png"), width = 1800, height = 1200, res = 200)
 
- plotSalience_fn(signed.X, 3)
+ plotSalience_fn(signed.X, 1)
 
  # Close the PNG device to save the file
  dev.off()
 
-  png(file.path(fig_dir, "Salience_YDim3.png"), width = 1800, height = 1200, res = 200)
+  png(file.path(fig_dir, "Salience_YDim1.png"), width = 1800, height = 1200, res = 200)
 
- plotSalience_fn(signed.Y, 3)
+ plotSalience_fn(signed.Y, 1)
  
  dev.off()
 ````
@@ -645,7 +647,7 @@ ggsave(q.plot,
 
 # generating bar plots for loadings of RSI data table
 ```{r}
-P.data1 <- pls.res$TExPosition.Data$pdq$p
+'''P.data1 <- pls.res$TExPosition.Data$pdq$p
 
 
 plot_P.data1 <- PrettyBarPlot2(
@@ -687,7 +689,7 @@ ggsave(plot_Q.data2,
     sep = "/"
   ),
   width = 10, height = 10, units = "in", dpi = 600
-)
+)'''
 ```
 
 ```{r}
@@ -745,24 +747,26 @@ write.csv(rni_res, paste(fig_dir,
 ```
 
 ```{r}
-
-print(resPerm4PLSC$pOmnibus)
+if (resPerm4PLSC$pOmnibus < 0.01) {
+  for (i in seq_along(resPerm4PLSC$pEigenvalues)) {
+    if (resPerm4PLSC$pEigenvalues[i] < 0.01) {
+      laDim <- i
+    }
+  }
+}
+print(laDim)
 ```
 
-if (resPerm4PLSC$pOmnibus < 0.01)
-  for (i in seq_along(resPerm4PLSC$pEigenvalues))
-    if (resPerm4PLSC$pEigenvalues[i] < 0.01)
-      laDim <- i
-      print(laDim)
+
 
 ```
 
 ```{r}
 # bootstrap ratios 
-laDim <- 3
+laDim <- 6
 
 # Save the plot for BR.I (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim3.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim6.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.I[, laDim],
   threshold = 3,
   font.size = 4,
@@ -772,7 +776,7 @@ PrettyBarPlot2(BR.I[, laDim],
 dev.off() # Close the PNG device for BR.I
 
 # Save the plot for BR.J (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim3.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim6.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.J[, laDim],
   threshold = 3,
   font.size = 4,
@@ -782,9 +786,27 @@ PrettyBarPlot2(BR.J[, laDim],
 dev.off() # Close the PNG device for BR.J
 ```
 
-
+### Percent Variance
 ```{r echo=TRUE}
+# your existing objects
+BR.I <- resBoot4PLSC$bootRatios.i
+BR.J <- resBoot4PLSC$bootRatios.j
 
+# Sum of squares per component (block I and block J)
+ssq.BR.I <- colSums(BR.I^2)
+ssq.BR.J <- colSums(BR.J^2)
+
+# Percent of total bootstrap‐ratio variance captured by each component
+pctVar.BR.I <- ssq.BR.I / sum(ssq.BR.I) * 100
+pctVar.BR.J <- ssq.BR.J / sum(ssq.BR.J) * 100
+
+# Print them (and pull out component 5 if you like)
+print(pctVar.BR.I)
+print(pctVar.BR.J)
+
+# percent for dimension 1
+pctVar.BR.I[1]
+pctVar.BR.J[1]
 
 ```
 
@@ -1081,7 +1103,7 @@ resBoot4PLSC
 
 
 ```{r echo=TRUE}
-BR.I <- resBoot4PLSC$bootRatios.i
+'''BR.I <- resBoot4PLSC$bootRatios.i
 BR.J <- resBoot4PLSC$bootRatios.j
 
 # saving the bootrap rations into excel
@@ -1119,7 +1141,7 @@ ba002.BR1.J <- PrettyBarPlot2(BR.J[, laDim],
 ) + ggtitle(paste0("Latent dimension ", laDim), subtitle = "Air pollution Saliences (loadings)")
 
 ba001.BR1.I
-ba002.BR1.J
+ba002.BR1.J'''
 ```
 
 ```{r echo=TRUE}
