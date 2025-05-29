@@ -47,13 +47,13 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/sociocult.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/sociocult.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/rsfc.csv")
 # phy_df <- read_csv("/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/phyhealth.csv")
 
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/figures/"
-out_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced"
+fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced/figures/"
+out_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/gn-reduced"
 
 
 ```
@@ -104,8 +104,6 @@ Group1_residuals <- as.data.frame(lm.Group1$residuals)
 #### Measure goodness of fit
 
 ```{r echo=TRUE}
-# Set the output directory and file name
-fig_dir <- "/Users/chloehampson/Desktop/projects/abcd-plsc/derivatives/none-reduced/figures/"
 fit_resi <- paste0(fig_dir, "resi-fit_rsfc.png") # Correct file path with slash
 
 # Open the PNG device to save the plots
@@ -728,19 +726,29 @@ BR.J <- resBoot4PLSC$bootRatios.j
 
 # saving the bootstrap rations into excel
 
-air_bootstrap <- as.data.frame(BR.J)
+socio_bootstrap <- as.data.frame(BR.J)
 rni_bootstrap <- as.data.frame(BR.I)
 
-air_res <- cbind.data.frame(socio_loadings, air_bootstrap)
+socio_res <- cbind.data.frame(socio_loadings, socio_bootstrap)
 rni_res <- cbind.data.frame(rest_loadings, rni_bootstrap)
 
-write.csv(air_res, paste(fig_dir,
+write.csv(socio_res, paste(out_dir,
   "rni-sociocult_Q-components.csv",
   sep = "/"
 ), row.names = TRUE)
 
-write.csv(rni_res, paste(fig_dir,
+write.csv(rni_res, paste(out_dir,
   "rni-brain_P-components.csv",
+  sep = "/"
+), row.names = TRUE)
+
+write.csv(pls.res$TExPosition.Data$lx, paste(out_dir,
+  "rniXrsfc_lx-base.csv",
+  sep = "/"
+), row.names = TRUE)
+
+write.csv(pls.res$TExPosition.Data$ly, paste(out_dir,
+  "rniXrsfc_ly-base.csv",
   sep = "/"
 ), row.names = TRUE)
 
@@ -763,10 +771,10 @@ print(laDim)
 
 ```{r}
 # bootstrap ratios 
-laDim <- 6
+laDim <- 4
 
 # Save the plot for BR.I (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim6.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRI_Dim4.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.I[, laDim],
   threshold = 3,
   font.size = 4,
@@ -776,7 +784,7 @@ PrettyBarPlot2(BR.I[, laDim],
 dev.off() # Close the PNG device for BR.I
 
 # Save the plot for BR.J (Component plot)
-png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim6.png"), width = 1800, height = 1200, res = 200)
+png(file.path(fig_dir, "Bootstrap_Ratio_BRJ_Dim4.png"), width = 1800, height = 1200, res = 200)
 PrettyBarPlot2(BR.J[, laDim],
   threshold = 3,
   font.size = 4,
@@ -788,10 +796,6 @@ dev.off() # Close the PNG device for BR.J
 
 ### Percent Variance
 ```{r echo=TRUE}
-# your existing objects
-BR.I <- resBoot4PLSC$bootRatios.i
-BR.J <- resBoot4PLSC$bootRatios.j
-
 # Sum of squares per component (block I and block J)
 ssq.BR.I <- colSums(BR.I^2)
 ssq.BR.J <- colSums(BR.J^2)
