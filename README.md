@@ -4,6 +4,20 @@ This repository contains R scripts that used partial least squares correlation (
 
 Additionally, for each significant latent dimension derived from PLSC, we conducted a regression analysis to determine how the identified sociocultural brain patterns may relate to behavioral risk/resilience factors, which will include measures of both physical health (e.g., physical inactivity, weight/obesity, sleep) and mental health (e.g., internalizing/externalizing symptoms).
 
+## Python Environment Requirements
+
+For the Python analysis components (including brain surface plotting and visualization), you will need:
+
+- **Python 3.9.6**
+- **Gradec**: Install first using:
+  ```bash
+  pip install git+https://github.com/JulioAPeraza/gradec.git
+  ```
+
+After installing Gradec, you can install the other required Python packages using the standard pip install commands for neuroimaging libraries (nilearn, surfplot, nibabel, etc.).
+
+## Variables
+
 Variables that were included in the PLSC analysis:
 
 | Sociocultural Measures          | Gordon Networks                  |
