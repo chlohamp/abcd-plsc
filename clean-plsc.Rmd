@@ -384,14 +384,14 @@ print(paste("Selected dimension:", laDim))
 
 ```{r}
 # Bootstrap ratios plots for dimensions 1 and 3
-dimensions_to_plot <- c(1, 3)
+dimensions_to_plot <- c(1, 2, 3, 4)
 
 for (dim in dimensions_to_plot) {
   cat("Creating bootstrap ratio plots for Dimension", dim, "\n")
   
   # Save the plot for BR.I (Brain/RSFC - Table 1)
   png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRI_Dim", dim, ".png")), 
-      width = 1800, height = 1200, res = 200)
+      width = 2000, height = 1200, res = 200)
   
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
     threshold = 3,
@@ -404,7 +404,7 @@ for (dim in dimensions_to_plot) {
   
   # Save the plot for BR.J (Sociocultural - Table 2)  
   png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRJ_Dim", dim, ".png")), 
-      width = 1800, height = 1200, res = 200)
+      width = 2000, height = 1200, res = 200)
   
   plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
     threshold = 3,
