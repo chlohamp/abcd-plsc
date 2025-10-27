@@ -194,8 +194,10 @@ BR.J <- resBoot4PLSC$bootRatios.j
 # Bootstrap ratios plots for dimensions 1 and 3
 for (dim in c(1, 3)) {
   # Save the plot for BR.I
+  # Save at 300 dpi: specify physical units (inches) and res = 300.
+  # 2000 x 1200 px at 300 dpi = 2000/300 = 6.6667 in, 1200/300 = 4 in
   png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRI_Dim", dim, ".png")), 
-      width = 2000, height = 1200, res = 200)
+    width = 6.667, height = 4, units = "in", res = 300)
 
   # For brain networks, use black for significant bars and grey for non-significant
   significant_idx <- abs(BR.I[, dim]) >= 3
@@ -203,7 +205,7 @@ for (dim in c(1, 3)) {
 
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
     threshold = 3,
-    font.size = 3,
+    font.size = 2,
     ylab = "Bootstrap ratios",
     color4bar = cols_I,
   ) + ggtitle(paste0("Component ", dim), subtitle = "Brain Networks (RSFC)")
@@ -243,8 +245,9 @@ build_row_colors <- function(rows, palette, default = "grey70") {
 }
 
 # Save the plot for BR.J
+# Save at 300 dpi: 2000 x 1200 px equivalent -> 6.667 x 4 in at 300 dpi
 png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRJ_Dim", dim, ".png")), 
-    width = 2000, height = 1200, res = 200)
+  width = 6.667, height = 4, units = "in", res = 300)
 
 
 # Apply colors only to significant bars
@@ -252,7 +255,7 @@ cols_J <- build_row_colors(rownames(BR.J), dim1_colors)
   
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
-  font.size = 4,
+  font.size = 3.5,
   ylab = "Bootstrap ratios",
   color4bar = cols_J,
 ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables") 
@@ -298,15 +301,16 @@ build_row_colors <- function(rows, palette, default = "grey70") {
 
 ```{r echo=TRUE}
 # Save the plot for BR.J
+# Save at 300 dpi: 2000 x 1200 px equivalent -> 6.667 x 4 in at 300 dpi
 png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRJ_Dim", dim, ".png")), 
-    width = 2000, height = 1200, res = 200)
+  width = 6.667, height = 4, units = "in", res = 300)
 
 # Apply colors only to significant bars
 cols_J <- build_row_colors(rownames(BR.J), dim3_colors)  # Use dim3_colors instead of dim1_colors
   
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
-  font.size = 4,
+  font.size = 3.5,
   ylab = "Bootstrap ratios",
   color4bar = cols_J,
   color4ns = "grey70"
