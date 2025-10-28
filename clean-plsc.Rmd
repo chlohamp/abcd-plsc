@@ -187,6 +187,15 @@ resBoot4PLSC
 BR.I <- resBoot4PLSC$bootRatios.i
 BR.J <- resBoot4PLSC$bootRatios.j
 
+# Reorder BR.J rows according to specified order
+desired_order <- c(
+  "EIE-Y", "EIC-Y", "HA-Y", "USA-Y", "FS-Y", "FO-Y", "FR-Y",
+  "EIE-C", "EIC-C", "HA-C", "USA-C", "FS-C", "FO-C", "FR-C",
+  "PD", "CCoh", "CCon", "COI", "NDI", "GGS"
+)
+
+BR.J <- BR.J[desired_order, ]
+
 ```
 
 
