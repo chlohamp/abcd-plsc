@@ -223,7 +223,7 @@ for (dim in c(1, 3)) {
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
     threshold = 3,
     font.size = 2,
-    ylab = "Bootstrap ratios",
+    ylab = "Bootstrap Ratios",
     color4bar = cols_I,
   ) + ggtitle(paste0("Component ", dim), subtitle = "Brain Networks (RSFC)")
 
@@ -242,8 +242,8 @@ dim <- 1  # Change this to plot different dimensions
 
 # Define colors for significant variables
 dim1_colors <- c(
-  "COI" = "#71C0E7",
-  "NDI" = "#9BF1FE"
+  "COI" = "#C7B3FB",
+  "NDI" = "#E9C1FF"
 )
 
 # Create color vector with grey default
@@ -273,7 +273,7 @@ cols_J <- build_row_colors(rownames(BR.J), dim1_colors)
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
   font.size = 3.5,
-  ylab = "Bootstrap ratios",
+  ylab = "Bootstrap Ratios",
   color4bar = cols_J
 ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
 
@@ -333,7 +333,7 @@ cols_J <- build_row_colors(rownames(BR.J), dim3_colors)  # Use dim3_colors inste
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
   font.size = 3.5,
-  ylab = "Bootstrap ratios",
+  ylab = "Bootstrap Ratios",
   color4bar = cols_J
 ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
 
@@ -393,7 +393,7 @@ cols_J <- build_row_colors(rownames(BR.J), dim1_colors)
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
   font.size = 3.5,
-  ylab = "Bootstrap ratios",
+  ylab = "Bootstrap Ratios",
   color4bar = cols_J,
 ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables") 
   
@@ -448,7 +448,7 @@ cols_J <- build_row_colors(rownames(BR.J), dim3_colors)  # Use dim3_colors inste
 plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
   threshold = 3,
   font.size = 3.5,
-  ylab = "Bootstrap ratios",
+  ylab = "Bootstrap Ratios",
   color4bar = cols_J,
   color4ns = "grey70"
 ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
