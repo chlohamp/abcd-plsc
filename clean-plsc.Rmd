@@ -196,6 +196,14 @@ desired_order <- c(
 
 BR.J <- BR.J[desired_order, ]
 
+# Debug: Print bootstrap ratios for dimension 1 to check COI and NDI values
+print("Bootstrap ratios for Dimension 1 - COI and NDI:")
+print(BR.J[c("COI", "NDI"), 1])
+print(paste("COI abs value:", abs(BR.J["COI", 1])))
+print(paste("NDI abs value:", abs(BR.J["NDI", 1])))
+print(paste("COI significant (>=3):", abs(BR.J["COI", 1]) >= 3))
+print(paste("NDI significant (>=3):", abs(BR.J["NDI", 1]) >= 3))
+
 ```
 
 
@@ -227,6 +235,126 @@ for (dim in c(1, 3)) {
 
 ```
 
+
+```{r echo=TRUE}
+# Bootstrap ratios plots for dimensions 1 
+dim <- 1  # Change this to plot different dimensions
+
+# Define colors for significant variables
+dim1_colors <- c(
+  "COI" = "#71C0E7",
+  "NDI" = "#9BF1FE"
+)
+
+# Create color vector with grey default
+build_row_colors <- function(rows, palette, default = "grey70") {
+  col_vec <- setNames(rep(default, length(rows)), rows)
+  # Only color the bars that are both in our color palette AND exceed the threshold of |3|
+  BR_values <- if(identical(rows, rownames(BR.I))) {
+    BR.I[, dim]
+  } else {
+    BR.J[, dim]
+  }
+  significant_idx <- abs(BR_values) >= 3  # Values >= +3 or <= -3 are significant
+  common <- intersect(names(palette), rows[significant_idx])
+  col_vec[common] <- palette[common]
+  unname(col_vec)
+}
+
+# Save the plot for BR.J
+# Save at 300 dpi: 2000 x 1200 px equivalent -> 6.667 x 4 in at 300 dpi
+png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRJ_Dim", dim, ".png")), 
+  width = 6.667, height = 4, units = "in", res = 300)
+
+
+# Apply colors only to significant bars
+cols_J <- build_row_colors(rownames(BR.J), dim1_colors)
+  
+plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
+  threshold = 3,
+  font.size = 3.5,
+  ylab = "Bootstrap ratios",
+  color4bar = cols_J
+) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
+
+# Extract the plot data and manually add a fill layer
+plot_data <- data.frame(
+  x = 1:nrow(BR.J),
+  y = BR.J[, dim],
+  fill_color = cols_J
+)
+
+plot_BRJ <- plot_BRJ + 
+  geom_col(data = plot_data, aes(x = x, y = y), fill = cols_J, color = cols_J)
+  
+print(plot_BRJ)
+dev.off() # Close the PNG device for BR.J
+  
+cat("✓ Saved bootstrap ratio plots for Dimension", dim, "\n\n")
+
+```
+
+
+```{r echo=TRUE}
+# Bootstrap ratios plots for dimensions 3
+dim <- 3  # Change this to plot different dimensions
+
+# Define colors for significant variables for dimension 3
+dim3_colors <- c(
+  "EIE-C" = "#90CEC1",
+  "EIC-C" = "#BCE3C8",
+  "HA-C" = "#D2F3D8"
+)
+
+# Create color vector with grey default
+build_row_colors <- function(rows, palette, default = "grey70") {
+  col_vec <- setNames(rep(default, length(rows)), rows)
+  # Only color the bars that are both in our color palette AND exceed the threshold of |3|
+  BR_values <- if(identical(rows, rownames(BR.I))) {
+    BR.I[, dim]
+  } else {
+    BR.J[, dim]
+  }
+  significant_idx <- abs(BR_values) >= 3  # Values >= +3 or <= -3 are significant
+  common <- intersect(names(palette), rows[significant_idx])
+  col_vec[common] <- palette[common]
+  unname(col_vec)
+}
+
+# Save the plot for BR.J
+# Save at 300 dpi: 2000 x 1200 px equivalent -> 6.667 x 4 in at 300 dpi
+png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRJ_Dim", dim, ".png")), 
+  width = 6.667, height = 4, units = "in", res = 300)
+
+# Apply colors only to significant bars
+cols_J <- build_row_colors(rownames(BR.J), dim3_colors)  # Use dim3_colors instead of dim1_colors
+
+  
+plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
+  threshold = 3,
+  font.size = 3.5,
+  ylab = "Bootstrap ratios",
+  color4bar = cols_J
+) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
+
+# Extract the plot data and manually add a fill layer
+plot_data <- data.frame(
+  x = 1:nrow(BR.J),
+  y = BR.J[, dim],
+  fill_color = cols_J
+)
+
+plot_BRJ <- plot_BRJ + 
+  geom_col(data = plot_data, aes(x = x, y = y), fill = cols_J, color = cols_J)
+  
+print(plot_BRJ)
+dev.off() # Close the PNG device for BR.J
+  
+cat("✓ Saved bootstrap ratio plots for Dimension", dim, "\n\n")
+
+```
+
+### Color bars here don't work:
 
 ```{r echo=TRUE}
 # Bootstrap ratios plots for dimensions 1 
