@@ -187,6 +187,45 @@ resBoot4PLSC
 BR.I <- resBoot4PLSC$bootRatios.i
 BR.J <- resBoot4PLSC$bootRatios.j
 
+```
+
+```{r}
+
+# Calculate percent variance explained by each PLSC dimension using the
+# bootstrap ratios (sum-of-squares per component). This combines both blocks (I and J)
+# so there is one result per dimension showing total bootstrap-ratio variance.
+## Sum of squares (per component) for each block
+ssq.BR.I <- colSums(BR.I^2)
+ssq.BR.J <- colSums(BR.J^2)
+
+## Combined SSQ per component (I + J)
+ssq.combined <- ssq.BR.I + ssq.BR.J
+
+## Percent of total combined bootstrap-ratio variance per component
+pctVar.combined <- ssq.combined / sum(ssq.combined) * 100
+
+## Cumulative percent
+cumVar.combined <- cumsum(pctVar.combined)
+
+## Build human-readable table and save
+pct_table_combined <- data.frame(
+  Component = paste0("Dim", seq_along(pctVar.combined)),
+  SSQ_Brain = round(ssq.BR.I, 6),
+  SSQ_Sociocultural = round(ssq.BR.J, 6),
+  SSQ_Combined = round(ssq.combined, 6),
+  Percent_Variance = round(pctVar.combined, 4),
+  Cumulative_Variance = round(cumVar.combined, 4)
+)
+
+print("Combined percent variance of bootstrap ratios (Brain + Sociocultural):")
+print(pct_table_combined)
+
+write.csv(pct_table_combined, file.path(out_dir, "pctVar_bootstrap_combined.csv"), row.names = FALSE)
+
+```
+
+```{r}
+
 # Reorder BR.J rows according to specified order
 desired_order <- c(
   "EIE-Y", "EIC-Y", "HA-Y", "USA-Y", "FS-Y", "FO-Y", "FR-Y",
@@ -206,6 +245,40 @@ print(paste("NDI significant (>=3):", abs(BR.J["NDI", 1]) >= 3))
 
 ```
 
+```{r}
+
+socio_bootstrap <- as.data.frame(BR.J)
+rni_bootstrap <- as.data.frame(BR.I)
+
+# Add src_subject_id as first column
+socio_res <- cbind.data.frame(src_subject_id = covar_df$src_subject_id, socio_loadings, socio_bootstrap)
+rni_res <- cbind.data.frame(src_subject_id = covar_df$src_subject_id, rest_loadings, rni_bootstrap)
+
+write.csv(socio_res, paste(out_dir,
+  "rni-sociocult_Q-components.csv",
+  sep = "/"
+), row.names = FALSE)
+
+write.csv(rni_res, paste(out_dir,
+  "rni-brain_P-components.csv",
+  sep = "/"
+), row.names = FALSE)
+
+# Add src_subject_id to lx and ly base files
+lx_with_id <- cbind.data.frame(src_subject_id = covar_df$src_subject_id, pls.res$TExPosition.Data$lx)
+ly_with_id <- cbind.data.frame(src_subject_id = covar_df$src_subject_id, pls.res$TExPosition.Data$ly)
+
+write.csv(lx_with_id, paste(out_dir,
+  "rniXrsfc_lx-base.csv",
+  sep = "/"
+), row.names = FALSE)
+
+write.csv(ly_with_id, paste(out_dir,
+  "rniXrsfc_ly-base.csv",
+  sep = "/"
+), row.names = FALSE)
+
+```
 
 ```{r echo=TRUE}
 # Bootstrap ratios plots for dimensions 1 and 3
