@@ -1,0 +1,234 @@
+
+Sociocultural DataFrame Missing Data Summary:
+                       Measure  Number of Subjects  Percentage Missing Above 5%
+                  macv_p_ss_fs                 582            1.188455         
+                  macv_p_ss_fo                 582            1.188455         
+                  macv_p_ss_fr                 582            1.188455         
+                  macv_y_ss_fs                 587            0.339559         
+                  macv_y_ss_fo                 587            0.339559         
+                  macv_y_ss_fr                 587            0.339559         
+   reshist_addr1_coi_r_coi_nat                 557            5.432937        *
+                 meim_p_ss_exp                 573            2.716469         
+                 meim_p_ss_com                 573            2.716469         
+reshist_addr1_nanda_disadv_fac                 581            1.358234         
+                   meim_ss_exp                 525           10.865874        *
+                   meim_ss_com                 525           10.865874        *
+   reshist_addr1_gstat_h_queen                 581            1.358234         
+                 dim_y_ss_mean                 578            1.867572         
+                   via_p_ss_hc                 495           15.959253        *
+                 via_p_ss_amer                 495           15.959253        *
+                     via_ss_hc                 506           14.091681        *
+                   via_ss_amer                 506           14.091681        *
+            comc_ss_cohesion_p                 583            1.018676         
+             comc_ss_control_p                 583            1.018676         
+
+Covariate DataFrame Missing Data Summary:
+               Measure  Number of Subjects  Percentage Missing Above 5%
+ mri_info_manufacturer                 589            0.000000         
+     rsfmri_meanmotion                 589            0.000000         
+         interview_age                 589            0.000000         
+         rel_family_id                 589            0.000000         
+             site_id_l                 589            0.000000         
+           demo_sex_v2                 589            0.000000         
+          demo_ethn_v2                 589            0.000000         
+      demo_prnt_age_v2                 583            1.018676         
+demo_prnt_gender_id_v2                 588            0.169779         
+     demo_prnt_ethn_v2                 584            0.848896         
+ demo_prnt_ed_v2_2yr_l                 586            0.509338         
+demo_prtnr_ed_v2_2yr_l                 499           15.280136        *
+   demo_comb_income_v2                 517           12.224109        *
+ demo_prnt_income_v2_l                 509           13.582343        *
+        demo_origin_v2                 588            0.169779         
+     demo_biomother_v2                 443           24.787776        *
+     demo_biofather_v2                 436           25.976231        *
+     demo_matgrandm_v2                 443           24.787776        *
+     demo_matgrandf_v2                 442           24.957555        *
+     demo_patgrandm_v2                 433           26.485569        *
+     demo_patgrandf_v2                 431           26.825127        *
+
+Physical Health DataFrame Missing Data Summary:
+                Measure  Number of Subjects  Percentage Missing Above 5%
+       mctq_sdweek_calc                 587            0.339559         
+        mctq_msfsc_calc                 501           14.940577        *
+       resp_wheeze_yn_y                 557            5.432937        *
+      resp_pmcough_yn_y                 587            0.339559         
+    resp_diagnosis_yn_y                 587            0.339559         
+       resp_bronch_yn_y                 537            8.828523        *
+blood_pressure_sys_mean                 574            2.546689         
+blood_pressure_dia_mean                 574            2.546689         
+   physical_activity1_y                 587            0.339559         
+cbcl_scr_syn_internal_t                 589            0.000000         
+cbcl_scr_syn_external_t                 589            0.000000         
+                    BMI                 585            0.679117         
+
+RSFC DataFrame Missing Data Summary:
+                       Measure  Number of Subjects  Percentage Missing Above 5%
+        rsfmri_c_ngd_ad_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_ad_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_ad_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_ad_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_ad_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_ad_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_ad_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_ad_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_ad_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_ad_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_ad_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_ad_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_ad_ngd_vs                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_ad                 589                 0.0         
+      rsfmri_c_ngd_cgc_ngd_cgc                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_ca                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_dt                 589                 0.0         
+      rsfmri_c_ngd_cgc_ngd_dla                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_fo                 589                 0.0         
+        rsfmri_c_ngd_cgc_ngd_n                 589                 0.0         
+   rsfmri_c_ngd_cgc_ngd_rspltp                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_sa                 589                 0.0         
+      rsfmri_c_ngd_cgc_ngd_smh                 589                 0.0         
+      rsfmri_c_ngd_cgc_ngd_smm                 589                 0.0         
+      rsfmri_c_ngd_cgc_ngd_vta                 589                 0.0         
+       rsfmri_c_ngd_cgc_ngd_vs                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_ca_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_ca_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_ca_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_ca_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_ca_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_ca_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_ca_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_ca_ngd_vs                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_dt_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_dt_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_dt_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_dt_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_dt_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_dt_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_dt_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_dt_ngd_vs                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_ad                 589                 0.0         
+      rsfmri_c_ngd_dla_ngd_cgc                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_ca                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_dt                 589                 0.0         
+      rsfmri_c_ngd_dla_ngd_dla                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_fo                 589                 0.0         
+        rsfmri_c_ngd_dla_ngd_n                 589                 0.0         
+   rsfmri_c_ngd_dla_ngd_rspltp                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_sa                 589                 0.0         
+      rsfmri_c_ngd_dla_ngd_smh                 589                 0.0         
+      rsfmri_c_ngd_dla_ngd_smm                 589                 0.0         
+      rsfmri_c_ngd_dla_ngd_vta                 589                 0.0         
+       rsfmri_c_ngd_dla_ngd_vs                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_fo_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_fo_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_fo_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_fo_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_fo_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_fo_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_fo_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_fo_ngd_vs                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_ad                 589                 0.0         
+        rsfmri_c_ngd_n_ngd_cgc                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_ca                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_dt                 589                 0.0         
+        rsfmri_c_ngd_n_ngd_dla                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_fo                 589                 0.0         
+          rsfmri_c_ngd_n_ngd_n                 589                 0.0         
+     rsfmri_c_ngd_n_ngd_rspltp                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_sa                 589                 0.0         
+        rsfmri_c_ngd_n_ngd_smh                 589                 0.0         
+        rsfmri_c_ngd_n_ngd_smm                 589                 0.0         
+        rsfmri_c_ngd_n_ngd_vta                 589                 0.0         
+         rsfmri_c_ngd_n_ngd_vs                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_ad                 589                 0.0         
+   rsfmri_c_ngd_rspltp_ngd_cgc                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_ca                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_dt                 589                 0.0         
+   rsfmri_c_ngd_rspltp_ngd_dla                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_fo                 589                 0.0         
+     rsfmri_c_ngd_rspltp_ngd_n                 589                 0.0         
+rsfmri_c_ngd_rspltp_ngd_rspltp                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_sa                 589                 0.0         
+   rsfmri_c_ngd_rspltp_ngd_smh                 589                 0.0         
+   rsfmri_c_ngd_rspltp_ngd_smm                 589                 0.0         
+   rsfmri_c_ngd_rspltp_ngd_vta                 589                 0.0         
+    rsfmri_c_ngd_rspltp_ngd_vs                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_sa_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_sa_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_sa_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_sa_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_sa_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_sa_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_sa_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_sa_ngd_vs                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_ad                 589                 0.0         
+      rsfmri_c_ngd_smh_ngd_cgc                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_ca                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_dt                 589                 0.0         
+      rsfmri_c_ngd_smh_ngd_dla                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_fo                 589                 0.0         
+        rsfmri_c_ngd_smh_ngd_n                 589                 0.0         
+   rsfmri_c_ngd_smh_ngd_rspltp                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_sa                 589                 0.0         
+      rsfmri_c_ngd_smh_ngd_smh                 589                 0.0         
+      rsfmri_c_ngd_smh_ngd_smm                 589                 0.0         
+      rsfmri_c_ngd_smh_ngd_vta                 589                 0.0         
+       rsfmri_c_ngd_smh_ngd_vs                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_ad                 589                 0.0         
+      rsfmri_c_ngd_smm_ngd_cgc                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_ca                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_dt                 589                 0.0         
+      rsfmri_c_ngd_smm_ngd_dla                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_fo                 589                 0.0         
+        rsfmri_c_ngd_smm_ngd_n                 589                 0.0         
+   rsfmri_c_ngd_smm_ngd_rspltp                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_sa                 589                 0.0         
+      rsfmri_c_ngd_smm_ngd_smh                 589                 0.0         
+      rsfmri_c_ngd_smm_ngd_smm                 589                 0.0         
+      rsfmri_c_ngd_smm_ngd_vta                 589                 0.0         
+       rsfmri_c_ngd_smm_ngd_vs                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_ad                 589                 0.0         
+      rsfmri_c_ngd_vta_ngd_cgc                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_ca                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_dt                 589                 0.0         
+      rsfmri_c_ngd_vta_ngd_dla                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_fo                 589                 0.0         
+        rsfmri_c_ngd_vta_ngd_n                 589                 0.0         
+   rsfmri_c_ngd_vta_ngd_rspltp                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_sa                 589                 0.0         
+      rsfmri_c_ngd_vta_ngd_smh                 589                 0.0         
+      rsfmri_c_ngd_vta_ngd_smm                 589                 0.0         
+      rsfmri_c_ngd_vta_ngd_vta                 589                 0.0         
+       rsfmri_c_ngd_vta_ngd_vs                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_ad                 589                 0.0         
+       rsfmri_c_ngd_vs_ngd_cgc                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_ca                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_dt                 589                 0.0         
+       rsfmri_c_ngd_vs_ngd_dla                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_fo                 589                 0.0         
+         rsfmri_c_ngd_vs_ngd_n                 589                 0.0         
+    rsfmri_c_ngd_vs_ngd_rspltp                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_sa                 589                 0.0         
+       rsfmri_c_ngd_vs_ngd_smh                 589                 0.0         
+       rsfmri_c_ngd_vs_ngd_smm                 589                 0.0         
+       rsfmri_c_ngd_vs_ngd_vta                 589                 0.0         
+        rsfmri_c_ngd_vs_ngd_vs                 589                 0.0         

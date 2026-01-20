@@ -6,7 +6,7 @@ options(contrasts = c("contr.sum", "contr.poly"))
 
 data_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression/dim1/" # Make sure to leave the slash at the end
 networks <- c("cgc-dt", "dt-dla", "dt-dt", "dt-vs", "vs-vs")
-# networks <- c("dt-smm", "vta-vs")
+#networks <- c("dt-smm", "vta-vs")
 roi <- "rsfc"
 
 # Level-1 Predictors
