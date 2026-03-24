@@ -43,13 +43,13 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/clean-socio.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/clean-rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/clean-socio.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/clean-rsfc.csv")
 
 
-fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/figures/"
-out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check"
+fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/figures/"
+out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced"
 
 
 ```
@@ -445,20 +445,11 @@ variance_table <- data.frame(
 print("Percent Variance Explained by Each Component:")
 print(variance_table)
 
-# For loadings contribution (optional - different from explained variance)
-# This shows how much each variable contributes to bootstrap ratio variance
-ssq.BR.I <- colSums(BR.I^2)
-ssq.BR.J <- colSums(BR.J^2)
-
-# Percent of total bootstrap ratio variance (NOT explained variance)
-pctContrib.BR.I <- ssq.BR.I / sum(ssq.BR.I) * 100
-pctContrib.BR.J <- ssq.BR.J / sum(ssq.BR.J) * 100
-
-print("Bootstrap Ratio Contribution (Variable Stability):")
-print("Block I (Brain):")
-print(round(pctContrib.BR.I, 2))
-print("Block J (Sociocultural):")
-print(round(pctContrib.BR.J, 2))
+write.csv(
+  variance_table,
+  file = file.path(out_dir, "percent_variance_explained.csv"),
+  row.names = FALSE
+)
 
 # Key results for first component
 cat("\n=== SUMMARY FOR DIMENSION 1 ===\n")
