@@ -43,13 +43,13 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/clean-socio.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/clean-rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/clean-socio.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/clean-rsfc.csv")
 
 
-fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/figures/"
-out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced"
+fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check/figures/"
+out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-check"
 
 
 ```
