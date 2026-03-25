@@ -15,7 +15,7 @@ numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
-    "mctq_msfsc_calc",
+    "sleep_chrono",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
     "cbcl_scr_syn_external_t",
@@ -24,7 +24,7 @@ phyhealth_vars <- c(
     "resp_composite"
 )
 
-phyhealth_cats <- c("delta_weight")
+phyhealth_cats <- c("sleep_chrono", "delta_weight")
 
 # Collector for p-values across all networks and phyhealth variables
 results <- data.frame(
@@ -41,9 +41,9 @@ for (network in networks) {
     data <- read.table(file = data_path, sep = ",", header = TRUE)
 
     for (phyhealth_var in phyhealth_vars) {
+        # Each phyhealth_var gets its own clean dataset (covariates + this predictor)
         all_columns <- c(roi, categorical_vars, numerical_vars, phyhealth_var, "site_id_l", "rel_family_id")
         sub_data <- data[, all_columns]
-        sub_data <- na.omit(sub_data)
 
         # Convert categorical variables to factors
         for (var in categorical_vars) {
@@ -67,7 +67,8 @@ for (network in networks) {
         fixed_effects <- paste(c(numerical_vars, categorical_vars), collapse = " + ")
 
         # Full model
-        equation_lme <- paste(roi, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)") # "+ (1|site_id_l/rel_family_id)")
+        equation_lme <- paste(roi, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)") 
+        print(equation_lme)
 
         # Run the full model (guard against failures on edge cases)
         fit_ok <- TRUE
@@ -81,7 +82,7 @@ for (network in networks) {
 
         if (fit_ok && !is.null(model)) {
             model_summary <- summary(model)
-            print(model_summary)
+            #print(model_summary)
         }
 
         if (fit_ok && !is.null(model)) {

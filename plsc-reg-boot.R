@@ -17,16 +17,16 @@ numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
-    "mctq_msfsc_calc",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
     "cbcl_scr_syn_external_t",
-    "delta_weight",
     "blood_pressure_mean",
-    "resp_composite"
+    "resp_composite",
+    "sleep_chrono", 
+    "delta_weight"
 )
 
-phyhealth_cats <- c("delta_weight")
+phyhealth_cats <- c("sleep_chrono", "delta_weight")
 
 for (dim in dimensions) {
     message(sprintf("\nProcessing %s...", dim))
@@ -52,16 +52,9 @@ for (dim in dimensions) {
     for (phyhealth_var in phyhealth_vars) {
         message(sprintf("  Analyzing %s...", phyhealth_var))
         
+        # Each phyhealth_var gets its own clean dataset (covariates + this predictor)
         all_columns <- c(score, categorical_vars, numerical_vars, phyhealth_var, "site_id_l", "rel_family_id")
-        # Check if all required columns exist
-        missing_cols <- setdiff(all_columns, colnames(data))
-        if (length(missing_cols) > 0) {
-            message(sprintf("    Missing columns for %s: %s", phyhealth_var, paste(missing_cols, collapse = ", ")))
-            next
-        }
-        
         sub_data <- data[, all_columns]
-        sub_data <- na.omit(sub_data)
         
         # Convert categorical variables to factors
         for (var in categorical_vars) {
@@ -82,6 +75,7 @@ for (dim in dimensions) {
         # Fixed effects formula
         fixed_effects <- paste(c(numerical_vars, categorical_vars), collapse = " + ")
         equation_lme <- paste(score, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)")
+        print(equation_lme)
         
         # Run the model (guard against failures)
         fit_ok <- TRUE
