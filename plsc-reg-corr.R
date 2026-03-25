@@ -4,9 +4,9 @@ library("readr")
 # Use sum-to-zero contrasts so Type III ANOVA p-values are meaningful for factors
 options(contrasts = c("contr.sum", "contr.poly"))
 
-data_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression/dim1/" # Make sure to leave the slash at the end
-networks <- c("cgc-dt", "dt-dla", "dt-dt", "dt-vs", "vs-vs")
-#networks <- c("dt-smm", "vta-vs")
+data_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression/dim3/" # Make sure to leave the slash at the end
+#networks <- c("DN-DN", "DN-VN", "VN-VN")
+networks <- c("DN-SMN")
 roi <- "rsfc"
 
 # Level-1 Predictors
@@ -16,18 +16,15 @@ phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
     "mctq_msfsc_calc",
-    "resp_wheeze_yn_y",
-    "resp_pmcough_yn_y",
-    "resp_diagnosis_yn_y",
-    "resp_bronch_yn_y",
-    "blood_pressure_sys_mean",
-    "blood_pressure_dia_mean",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
-    "cbcl_scr_syn_external_t"
+    "cbcl_scr_syn_external_t",
+    "delta_weight",
+    "blood_pressure_mean",
+    "resp_composite"
 )
 
-phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
+phyhealth_cats <- c("delta_weight")
 
 # Collector for p-values across all networks and phyhealth variables
 results <- data.frame(
@@ -146,7 +143,7 @@ if (!is.null(results) && nrow(results) > 0) {
     results$significant_p05 <- ifelse(!is.na(results$p_value) & results$p_value < 0.05, TRUE, FALSE)
     results$significant_p01 <- ifelse(!is.na(results$p_value) & results$p_value < 0.01, TRUE, FALSE)
     reg_root <- dirname(data_dir)  # parent directory of the dimension folder
-    summary_out <- file.path(reg_root, "plsc-reg-corr-dim1-results.csv")
+    summary_out <- file.path(reg_root, "plsc-reg-corr-dim3-results.csv")
     write.csv(results, file = summary_out, row.names = FALSE)
     message(sprintf("Wrote summary p-values table to regression folder: %s", summary_out))
 }

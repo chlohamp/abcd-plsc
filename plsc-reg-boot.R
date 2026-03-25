@@ -15,12 +15,18 @@ score <- "score"  # This is our bootstrap ratio outcome variable
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
 numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
 phyhealth_vars <- c(
-    "BMI", "mctq_sdweek_calc", "mctq_msfsc_calc", "resp_wheeze_yn_y", "resp_pmcough_yn_y",
-    "resp_diagnosis_yn_y", "resp_bronch_yn_y", "blood_pressure_sys_mean", "blood_pressure_dia_mean",
-    "physical_activity1_y", "cbcl_scr_syn_internal_t", "cbcl_scr_syn_external_t"
+    "BMI",
+    "mctq_sdweek_calc",
+    "mctq_msfsc_calc",
+    "physical_activity1_y",
+    "cbcl_scr_syn_internal_t",
+    "cbcl_scr_syn_external_t",
+    "delta_weight",
+    "blood_pressure_mean",
+    "resp_composite"
 )
 
-phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
+phyhealth_cats <- c("delta_weight")
 
 for (dim in dimensions) {
     message(sprintf("\nProcessing %s...", dim))
