@@ -43,14 +43,14 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/clean-socio.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/clean-rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-socio.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-rsfc.csv")
 
 
-fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/figures/"
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
-out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion"
+out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion"
 
 
 ```
@@ -83,7 +83,8 @@ lm.Group1 <- lm(Group1.Y ~ Group1.X$interview_age +
   Group1.X$demo_comb_income_v2 +
   as.factor(Group1.X$demo_origin_v2) +
   as.factor(Group1.X$site_id_l) +
-  as.factor(Group1.X$mri_info_manufacturer), na.action = na.omit)
+  as.factor(Group1.X$mri_info_manufacturer) +
+  Group1.X$rsfmri_meanmotion, na.action = na.omit)
 
 
 # R.square -> how well the model explains the variation in the data which is not random
@@ -108,7 +109,8 @@ lm.Group2 <- lm(Group2.Y ~ Group1.X$interview_age +
   Group1.X$demo_comb_income_v2 +
   as.factor(Group1.X$demo_origin_v2) +
   as.factor(Group1.X$site_id_l) +
-  as.factor(Group1.X$mri_info_manufacturer), na.action = na.omit)
+  as.factor(Group1.X$mri_info_manufacturer) +
+  Group1.X$rsfmri_meanmotion, na.action = na.omit)
 
 # keep if we decide this is how we want to deal with missing data #,na.action = na.omit)
 # Run VIF to check for multicollinearity
