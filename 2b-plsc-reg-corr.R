@@ -4,14 +4,25 @@ library("readr")
 # Use sum-to-zero contrasts so Type III ANOVA p-values are meaningful for factors
 options(contrasts = c("contr.sum", "contr.poly"))
 
-data_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression/dim3/" # Make sure to leave the slash at the end
-#networks <- c("DN-DN", "DN-VN", "VN-VN")
-networks <- c("DN-SMN")
+reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/regression"
+
+# Define dimensions and their networks
+dimensions <- list(
+    dim1 = list(
+        dir = file.path(reg_root_dir, "dim1"),
+        networks = c("DN-DN", "VN-VN")
+    ),
+    dim3 = list(
+        dir = file.path(reg_root_dir, "dim3"),
+        networks = c("DN-SMN")
+    )
+)
+
 roi <- "rsfc"
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2") #, "rsfmri_meanmotion"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
@@ -28,6 +39,7 @@ phyhealth_cats <- c("sleep_chrono", "delta_weight")
 
 # Collector for p-values across all networks and phyhealth variables
 results <- data.frame(
+    dimension = character(),
     network = character(),
     phyhealth_var = character(),
     var_type = character(),
@@ -36,9 +48,15 @@ results <- data.frame(
     stringsAsFactors = FALSE
 )
 
-for (network in networks) {
-    data_path <- paste0(data_dir, "phyhealth_", network, "_data.csv")
-    data <- read.table(file = data_path, sep = ",", header = TRUE)
+# Loop through each dimension (dim1, dim3)
+for (dim_name in names(dimensions)) {
+    dim_info <- dimensions[[dim_name]]
+    data_dir <- dim_info$dir
+    networks <- dim_info$networks
+    
+    for (network in networks) {
+        data_path <- paste0(data_dir, "/phyhealth_", network, "_data.csv")
+        data <- read.table(file = data_path, sep = ",", header = TRUE)
 
     for (phyhealth_var in phyhealth_vars) {
         # Each phyhealth_var gets its own clean dataset (covariates + this predictor)
@@ -128,6 +146,7 @@ for (network in networks) {
         results <- rbind(
             results,
             data.frame(
+                dimension = dim_name,
                 network = network,
                 phyhealth_var = phyhealth_var,
                 var_type = ifelse(phyhealth_var %in% phyhealth_cats, "categorical", "continuous"),
@@ -137,14 +156,26 @@ for (network in networks) {
             )
         )
     }
+    }
 }
 
-# Add significance flag and write summary table to the regression folder (parent of data_dir)
+# Add significance flag and write summary tables
 if (!is.null(results) && nrow(results) > 0) {
     results$significant_p05 <- ifelse(!is.na(results$p_value) & results$p_value < 0.05, TRUE, FALSE)
     results$significant_p01 <- ifelse(!is.na(results$p_value) & results$p_value < 0.01, TRUE, FALSE)
-    reg_root <- dirname(data_dir)  # parent directory of the dimension folder
-    summary_out <- file.path(reg_root, "plsc-reg-corr-dim3-results.csv")
-    write.csv(results, file = summary_out, row.names = FALSE)
-    message(sprintf("Wrote summary p-values table to regression folder: %s", summary_out))
+    
+    # Write combined summary
+    combined_summary_out <- file.path(reg_root_dir, "plsc-reg-corr-results-all.csv")
+    write.csv(results, file = combined_summary_out, row.names = FALSE)
+    message(sprintf("Wrote combined results table to: %s", combined_summary_out))
+    
+    # Write dimension-specific summaries
+    for (dim_name in names(dimensions)) {
+        dim_results <- results[results$dimension == dim_name, ]
+        if (nrow(dim_results) > 0) {
+            dim_summary_out <- file.path(reg_root_dir, paste0("plsc-reg-corr-results-", dim_name, ".csv"))
+            write.csv(dim_results, file = dim_summary_out, row.names = FALSE)
+            message(sprintf("Wrote %s results table to: %s", dim_name, dim_summary_out))
+        }
+    }
 }

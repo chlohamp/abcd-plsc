@@ -7,13 +7,13 @@ library("dplyr")
 options(contrasts = c("contr.sum", "contr.poly"))
 
 # Base directory for regression analyses
-reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression"
+reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/regression"
 dimensions <- c("dim1", "dim3")
 score <- "score"  # This is our bootstrap ratio outcome variable
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2") #, "rsfmri_meanmotion"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
@@ -41,7 +41,7 @@ for (dim in dimensions) {
     )
     
     # Load the bootstrap ratio data for this dimension
-    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_data.csv", dim))
+    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_latent_data.csv", dim))
     if (!file.exists(data_path)) {
         message(sprintf("Data file not found for %s: %s", dim, data_path))
         next
