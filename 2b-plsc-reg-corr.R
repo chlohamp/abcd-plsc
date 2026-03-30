@@ -4,33 +4,42 @@ library("readr")
 # Use sum-to-zero contrasts so Type III ANOVA p-values are meaningful for factors
 options(contrasts = c("contr.sum", "contr.poly"))
 
-data_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced/regression/dim1/" # Make sure to leave the slash at the end
-networks <- c("cgc-dt", "dt-dla", "dt-dt", "dt-vs", "vs-vs")
-#networks <- c("dt-smm", "vta-vs")
+reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/regression"
+
+# Define dimensions and their networks
+dimensions <- list(
+    dim1 = list(
+        dir = file.path(reg_root_dir, "dim1"),
+        networks = c("DN-DN", "VN-VN")
+    ),
+    dim3 = list(
+        dir = file.path(reg_root_dir, "dim3"),
+        networks = c("DN-SMN")
+    )
+)
+
 roi <- "rsfc"
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2") #, "rsfmri_meanmotion"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
-    "mctq_msfsc_calc",
-    "resp_wheeze_yn_y",
-    "resp_pmcough_yn_y",
-    "resp_diagnosis_yn_y",
-    "resp_bronch_yn_y",
-    "blood_pressure_sys_mean",
-    "blood_pressure_dia_mean",
+    "sleep_chrono",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
-    "cbcl_scr_syn_external_t"
+    "cbcl_scr_syn_external_t",
+    "delta_weight",
+    "blood_pressure_mean",
+    "resp_composite"
 )
 
-phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
+phyhealth_cats <- c("sleep_chrono", "delta_weight")
 
 # Collector for p-values across all networks and phyhealth variables
 results <- data.frame(
+    dimension = character(),
     network = character(),
     phyhealth_var = character(),
     var_type = character(),
@@ -39,14 +48,20 @@ results <- data.frame(
     stringsAsFactors = FALSE
 )
 
-for (network in networks) {
-    data_path <- paste0(data_dir, "phyhealth_", network, "_data.csv")
-    data <- read.table(file = data_path, sep = ",", header = TRUE)
+# Loop through each dimension (dim1, dim3)
+for (dim_name in names(dimensions)) {
+    dim_info <- dimensions[[dim_name]]
+    data_dir <- dim_info$dir
+    networks <- dim_info$networks
+    
+    for (network in networks) {
+        data_path <- paste0(data_dir, "/phyhealth_", network, "_data.csv")
+        data <- read.table(file = data_path, sep = ",", header = TRUE)
 
     for (phyhealth_var in phyhealth_vars) {
+        # Each phyhealth_var gets its own clean dataset (covariates + this predictor)
         all_columns <- c(roi, categorical_vars, numerical_vars, phyhealth_var, "site_id_l", "rel_family_id")
         sub_data <- data[, all_columns]
-        sub_data <- na.omit(sub_data)
 
         # Convert categorical variables to factors
         for (var in categorical_vars) {
@@ -70,7 +85,8 @@ for (network in networks) {
         fixed_effects <- paste(c(numerical_vars, categorical_vars), collapse = " + ")
 
         # Full model
-        equation_lme <- paste(roi, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)") # "+ (1|site_id_l/rel_family_id)")
+        equation_lme <- paste(roi, "~", phyhealth_var, "+", fixed_effects, "+ (1|site_id_l/rel_family_id)") 
+        print(equation_lme)
 
         # Run the full model (guard against failures on edge cases)
         fit_ok <- TRUE
@@ -84,7 +100,7 @@ for (network in networks) {
 
         if (fit_ok && !is.null(model)) {
             model_summary <- summary(model)
-            print(model_summary)
+            #print(model_summary)
         }
 
         if (fit_ok && !is.null(model)) {
@@ -130,6 +146,7 @@ for (network in networks) {
         results <- rbind(
             results,
             data.frame(
+                dimension = dim_name,
                 network = network,
                 phyhealth_var = phyhealth_var,
                 var_type = ifelse(phyhealth_var %in% phyhealth_cats, "categorical", "continuous"),
@@ -139,14 +156,26 @@ for (network in networks) {
             )
         )
     }
+    }
 }
 
-# Add significance flag and write summary table to the regression folder (parent of data_dir)
+# Add significance flag and write summary tables
 if (!is.null(results) && nrow(results) > 0) {
     results$significant_p05 <- ifelse(!is.na(results$p_value) & results$p_value < 0.05, TRUE, FALSE)
     results$significant_p01 <- ifelse(!is.na(results$p_value) & results$p_value < 0.01, TRUE, FALSE)
-    reg_root <- dirname(data_dir)  # parent directory of the dimension folder
-    summary_out <- file.path(reg_root, "plsc-reg-corr-dim1-results.csv")
-    write.csv(results, file = summary_out, row.names = FALSE)
-    message(sprintf("Wrote summary p-values table to regression folder: %s", summary_out))
+    
+    # Write combined summary
+    combined_summary_out <- file.path(reg_root_dir, "plsc-reg-corr-results-all.csv")
+    write.csv(results, file = combined_summary_out, row.names = FALSE)
+    message(sprintf("Wrote combined results table to: %s", combined_summary_out))
+    
+    # Write dimension-specific summaries
+    for (dim_name in names(dimensions)) {
+        dim_results <- results[results$dimension == dim_name, ]
+        if (nrow(dim_results) > 0) {
+            dim_summary_out <- file.path(reg_root_dir, paste0("plsc-reg-corr-results-", dim_name, ".csv"))
+            write.csv(dim_results, file = dim_summary_out, row.names = FALSE)
+            message(sprintf("Wrote %s results table to: %s", dim_name, dim_summary_out))
+        }
+    }
 }
