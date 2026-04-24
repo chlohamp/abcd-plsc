@@ -394,11 +394,37 @@ for (dim in dimensions_to_plot) {
   png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRI_Dim", dim, ".png")), 
       width = 2000, height = 1200, res = 200)
   
+  thr <- 3
+
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
-    threshold = 3,
+    threshold = thr,
     font.size = 4,
     ylab = "Bootstrap ratios"
   ) + ggtitle(paste0("Component ", dim), subtitle = "Brain Networks (RSFC)")
+
+  # For the *first* RSFC plot (Dim 1), make only the significant bars black
+  # (significant = abs(bootstrap ratio) >= threshold) and color their labels black too
+  if (dim == 1 && inherits(plot_BRI, "ggplot")) {
+    sig_df <- subset(plot_BRI$data, abs(bootratio) >= thr)
+    if (nrow(sig_df) > 0) {
+      plot_BRI <- plot_BRI +
+        geom_col(
+          data = sig_df,
+          mapping = aes(x = IDnum, y = bootratio),
+          inherit.aes = FALSE,
+          fill = "black",
+          colour = "black"
+        ) +
+        geom_text(
+          data = sig_df,
+          mapping = aes(x = IDnum, y = 0, label = ID),
+          inherit.aes = FALSE,
+          colour = "black",
+          size = 4,
+          vjust = 1
+        )
+    }
+  }
   
   print(plot_BRI)
   dev.off() # Close the PNG device for BR.I
