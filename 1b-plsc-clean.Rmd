@@ -141,9 +141,7 @@ corr <- paste0(fig_dir, "correlation_plot.png")
 
 
 # Create the plot
-png(corr, width = 1200, height = 800, res = 300) # Increase res to 300 dpi
-
-
+png(corr, width = 1600, height = 400, res = 300) # Increase res to 300 dpi
 
 # for full
 corrplot(XY.cor.pearson,
@@ -387,6 +385,16 @@ print(paste("Selected dimension:", laDim))
 # Bootstrap ratios plots for dimensions 1 and 3
 dimensions_to_plot <- c(1, 2, 3, 4)
 
+rsfc_colors <- rep("black", nrow(BR.I))
+socio_colors <- rep("black", nrow(BR.J))
+socio_colors[7] <- "#6FBFE1"
+socio_colors[10] <- "#9BF1FE"
+socio_colors[2] <- "#90CEC1"
+socio_colors[3] <- "#BCE3C8"
+socio_colors[8] <- "#90CEC1"
+socio_colors[9] <- "#BCE3C8"
+socio_colors[15] <- "#D2F3D8"
+
 for (dim in dimensions_to_plot) {
   cat("Creating bootstrap ratio plots for Dimension", dim, "\n")
   
@@ -399,32 +407,9 @@ for (dim in dimensions_to_plot) {
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
     threshold = thr,
     font.size = 4,
+    color4bar = rsfc_colors,
     ylab = "Bootstrap ratios"
   ) + ggtitle(paste0("Component ", dim), subtitle = "Brain Networks (RSFC)")
-
-  # For the *first* RSFC plot (Dim 1), make only the significant bars black
-  # (significant = abs(bootstrap ratio) >= threshold) and color their labels black too
-  if (dim == 1 && inherits(plot_BRI, "ggplot")) {
-    sig_df <- subset(plot_BRI$data, abs(bootratio) >= thr)
-    if (nrow(sig_df) > 0) {
-      plot_BRI <- plot_BRI +
-        geom_col(
-          data = sig_df,
-          mapping = aes(x = IDnum, y = bootratio),
-          inherit.aes = FALSE,
-          fill = "black",
-          colour = "black"
-        ) +
-        geom_text(
-          data = sig_df,
-          mapping = aes(x = IDnum, y = 0, label = ID),
-          inherit.aes = FALSE,
-          colour = "black",
-          size = 4,
-          vjust = 1
-        )
-    }
-  }
   
   print(plot_BRI)
   dev.off() # Close the PNG device for BR.I
@@ -436,6 +421,7 @@ for (dim in dimensions_to_plot) {
   plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
     threshold = 3,
     font.size = 4,
+    color4bar = socio_colors,
     ylab = "Bootstrap ratios"
   ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
   
