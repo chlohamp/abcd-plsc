@@ -4,13 +4,13 @@ library("readr")
 # Use sum-to-zero contrasts so Type III ANOVA p-values are meaningful for factors
 options(contrasts = c("contr.sum", "contr.poly"))
 
-reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no-motion/regression"
+reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/regression"
 
 # Define dimensions and their networks
 dimensions <- list(
     dim1 = list(
         dir = file.path(reg_root_dir, "dim1"),
-        networks = c("DN-DN", "VN-VN")
+        networks = c("DN-DN", "DN-VN", "VN-VN")
     ),
     dim3 = list(
         dir = file.path(reg_root_dir, "dim3"),
@@ -22,7 +22,7 @@ roi <- "rsfc"
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2") #, "rsfmri_meanmotion"
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
