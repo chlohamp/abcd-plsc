@@ -43,14 +43,14 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-socio.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/clean-socio.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/clean-rsfc.csv")
 
 
-fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/figures/"
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
-out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion"
+out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory"
 
 
 ```
