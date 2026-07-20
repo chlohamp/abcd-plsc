@@ -385,15 +385,31 @@ print(paste("Selected dimension:", laDim))
 # Bootstrap ratios plots for dimensions 1 and 3
 dimensions_to_plot <- c(1, 2, 3, 4)
 
+# Colors are keyed by VARIABLE NAME (not row position), so they stay attached
+# to the correct variable no matter what order the bars are plotted in.
+socio_color_map <- setNames(rep("black", ncol(data2)), colnames(data2))
+socio_color_map["COI"]   <- "#6FBFE1"
+socio_color_map["NDI"]   <- "#9BF1FE"
+socio_color_map["FO-C"]  <- "#90CEC1"
+socio_color_map["EIE-C"] <- "#90CEC1"
+socio_color_map["FR-C"]  <- "#BCE3C8"
+socio_color_map["EIC-C"] <- "#BCE3C8"
+socio_color_map["HA-C"]  <- "#D2F3D8"
+
+# Desired x-axis order for the sociocultural (BR.J) plot:
+# Youth-report block, then Caregiver-report block, then neighborhood/environment block
+socio_order <- c(
+  "EIE-Y", "EIC-Y", "HA-Y", "USA-Y", "FS-Y", "FO-Y", "FR-Y",
+  "EIE-C", "EIC-C", "HA-C", "USA-C", "FS-C", "FO-C", "FR-C",
+  "PD", "CCoh", "CCon", "COI", "NDI", "GGS"
+)
+
+# Reorder BR.J's rows and pull colors in that same order - since both are
+# indexed by the same `socio_order` vector, they can never get out of sync.
+BR.J <- BR.J[socio_order, , drop = FALSE]
+socio_colors <- unname(socio_color_map[socio_order])
+
 rsfc_colors <- rep("black", nrow(BR.I))
-socio_colors <- rep("black", nrow(BR.J))
-socio_colors[7] <- "#6FBFE1"
-socio_colors[10] <- "#9BF1FE"
-socio_colors[2] <- "#90CEC1"
-socio_colors[3] <- "#BCE3C8"
-socio_colors[8] <- "#90CEC1"
-socio_colors[9] <- "#BCE3C8"
-socio_colors[15] <- "#D2F3D8"
 
 for (dim in dimensions_to_plot) {
   cat("Creating bootstrap ratio plots for Dimension", dim, "\n")
