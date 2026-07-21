@@ -4,17 +4,17 @@ library("readr")
 # Use sum-to-zero contrasts so Type III ANOVA p-values are meaningful for factors
 options(contrasts = c("contr.sum", "contr.poly"))
 
-reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/regression"
+reg_root_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/regression"
 
 # Define dimensions and their networks
 dimensions <- list(
     dim1 = list(
         dir = file.path(reg_root_dir, "dim1"),
-        networks = c("DN-DN", "DN-VN", "VN-VN")
+        networks = c("cgc-dt", "dt-dla", "dt-dt", "dt-vs", "vs-vs")
     ),
     dim3 = list(
         dir = file.path(reg_root_dir, "dim3"),
-        networks = c("DN-SMN")
+        networks = c("dt-smm", "vta-vs")
     )
 )
 
@@ -26,16 +26,19 @@ numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l"
 phyhealth_vars <- c(
     "BMI",
     "mctq_sdweek_calc",
-    "sleep_chrono",
+    "mctq_msfsc_calc",
+    "resp_wheeze_yn_y",
+    "resp_pmcough_yn_y",
+    "resp_diagnosis_yn_y",
+    "resp_bronch_yn_y",
+    "blood_pressure_sys_mean",
+    "blood_pressure_dia_mean",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
-    "cbcl_scr_syn_external_t",
-    "delta_weight",
-    "blood_pressure_mean",
-    "resp_composite"
+    "cbcl_scr_syn_external_t"
 )
 
-phyhealth_cats <- c("sleep_chrono", "delta_weight")
+phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
 
 # Collector for p-values across all networks and phyhealth variables
 results <- data.frame(
@@ -114,7 +117,7 @@ for (dim_name in names(dimensions)) {
         # Save per-model coefficient table if model fit
         if (fit_ok && !is.null(model)) {
             model_table <- as.data.frame(coef(summary(model)))
-            out_file <- paste0(data_dir, "phyhealth_", network, "_", phyhealth_var, "_table.csv")
+            out_file <- file.path(data_dir, sprintf("phyhealth_%s_%s_table.csv", network, phyhealth_var))
             write.csv(model_table, file = out_file, row.names = TRUE)
         }
 

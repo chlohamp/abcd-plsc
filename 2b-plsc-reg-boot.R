@@ -7,26 +7,33 @@ library("dplyr")
 options(contrasts = c("contr.sum", "contr.poly"))
 
 # Base directory for regression analyses
-reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/regression"
+reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/regression"
 dimensions <- c("dim1", "dim3")
 score <- "score"  # This is our bootstrap ratio outcome variable
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion") 
-phyhealth_vars <- c(
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+# Candidate phyhealth predictors. Not every variable is present for every
+# dimension's data file (e.g. BMI is missing from dim1's data but present in
+# dim3's) - the actual list used per dimension is the intersection with that
+# dimension's columns, computed inside the loop below.
+phyhealth_vars_all <- c(
     "BMI",
     "mctq_sdweek_calc",
+    "mctq_msfsc_calc",
+    "resp_wheeze_yn_y",
+    "resp_pmcough_yn_y",
+    "resp_diagnosis_yn_y",
+    "resp_bronch_yn_y",
+    "blood_pressure_sys_mean",
+    "blood_pressure_dia_mean",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
-    "cbcl_scr_syn_external_t",
-    "blood_pressure_mean",
-    "resp_composite",
-    "sleep_chrono", 
-    "delta_weight"
+    "cbcl_scr_syn_external_t"
 )
 
-phyhealth_cats <- c("sleep_chrono", "delta_weight")
+phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
 
 for (dim in dimensions) {
     message(sprintf("\nProcessing %s...", dim))
@@ -41,14 +48,32 @@ for (dim in dimensions) {
     )
     
     # Load the bootstrap ratio data for this dimension
-    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_latent_data.csv", dim))
+    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_data.csv", dim))
     if (!file.exists(data_path)) {
         message(sprintf("Data file not found for %s: %s", dim, data_path))
         next
     }
     
     data <- read.table(file = data_path, sep = ",", header = TRUE)
-    
+
+    # BMI isn't included in every dimension's pre-built data file (e.g. dim1),
+    # even though it exists per-subject in the master phyhealth file. Merge it
+    # in by src_subject_id when it's missing, rather than skipping it.
+    if (!("BMI" %in% colnames(data))) {
+        phyhealth_master_path <- file.path(reg_dir, "phyhealth-reg.csv")
+        phyhealth_master <- read.table(file = phyhealth_master_path, sep = ",", header = TRUE)
+        n_before <- nrow(data)
+        data <- merge(data, phyhealth_master[, c("src_subject_id", "BMI")], by = "src_subject_id", all.x = TRUE)
+        message(sprintf("  Merged BMI in from %s (%d/%d subjects matched)", phyhealth_master_path, sum(!is.na(data$BMI)), n_before))
+    }
+
+    # Only analyze predictors that actually exist as columns for this dimension
+    phyhealth_vars <- intersect(phyhealth_vars_all, colnames(data))
+    missing_vars <- setdiff(phyhealth_vars_all, colnames(data))
+    if (length(missing_vars) > 0) {
+        message(sprintf("  Skipping (not present in %s data): %s", dim, paste(missing_vars, collapse = ", ")))
+    }
+
     for (phyhealth_var in phyhealth_vars) {
         message(sprintf("  Analyzing %s...", phyhealth_var))
         
