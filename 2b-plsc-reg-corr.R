@@ -47,6 +47,10 @@ results <- data.frame(
     phyhealth_var = character(),
     var_type = character(),
     N = integer(),
+    estimate = numeric(),
+    std_error = numeric(),
+    ci_lower = numeric(),
+    ci_upper = numeric(),
     p_value = numeric(),
     stringsAsFactors = FALSE
 )
@@ -145,6 +149,37 @@ for (dim_name in names(dimensions)) {
             }
         }
 
+        # Extract point estimate, std. error, and 95% Wald CI (using the
+        # Satterthwaite df from lmerTest) for the phyhealth_var coefficient.
+        # Binary factors (contr.sum, 2 levels) get a single coefficient
+        # named "<var>1" rather than "<var>".
+        estimate <- NA_real_
+        std_error <- NA_real_
+        ci_lower <- NA_real_
+        ci_upper <- NA_real_
+
+        if (fit_ok && !is.null(model)) {
+            cs <- tryCatch(as.data.frame(coef(summary(model))), error = function(e) NULL)
+            if (!is.null(cs)) {
+                coef_row_name <- phyhealth_var
+                if (!(coef_row_name %in% rownames(cs)) &&
+                    paste0(phyhealth_var, "1") %in% rownames(cs)) {
+                    coef_row_name <- paste0(phyhealth_var, "1")
+                }
+
+                if (coef_row_name %in% rownames(cs)) {
+                    estimate <- suppressWarnings(as.numeric(cs[coef_row_name, "Estimate"]))
+                    std_error <- suppressWarnings(as.numeric(cs[coef_row_name, "Std. Error"]))
+                    coef_df <- suppressWarnings(as.numeric(cs[coef_row_name, "df"]))
+                    if (!is.na(estimate) && !is.na(std_error) && !is.na(coef_df)) {
+                        t_crit <- qt(0.975, df = coef_df)
+                        ci_lower <- estimate - t_crit * std_error
+                        ci_upper <- estimate + t_crit * std_error
+                    }
+                }
+            }
+        }
+
         # Record result row
         results <- rbind(
             results,
@@ -154,6 +189,10 @@ for (dim_name in names(dimensions)) {
                 phyhealth_var = phyhealth_var,
                 var_type = ifelse(phyhealth_var %in% phyhealth_cats, "categorical", "continuous"),
                 N = nrow(sub_data),
+                estimate = estimate,
+                std_error = std_error,
+                ci_lower = ci_lower,
+                ci_upper = ci_upper,
                 p_value = p_val,
                 stringsAsFactors = FALSE
             )
@@ -176,7 +215,7 @@ if (!is.null(results) && nrow(results) > 0) {
     for (dim_name in names(dimensions)) {
         dim_results <- results[results$dimension == dim_name, ]
         if (nrow(dim_results) > 0) {
-            dim_summary_out <- file.path(reg_root_dir, paste0("plsc-reg-corr-results-", dim_name, ".csv"))
+            dim_summary_out <- file.path(reg_root_dir, paste0("plsc-reg-corr-", dim_name, "-results.csv"))
             write.csv(dim_results, file = dim_summary_out, row.names = FALSE)
             message(sprintf("Wrote %s results table to: %s", dim_name, dim_summary_out))
         }

@@ -43,6 +43,10 @@ for (dim in dimensions) {
         phyhealth_var = character(),
         var_type = character(),
         N = integer(),
+        estimate = numeric(),
+        std_error = numeric(),
+        ci_lower = numeric(),
+        ci_upper = numeric(),
         p_value = numeric(),
         stringsAsFactors = FALSE
     )
@@ -124,7 +128,7 @@ for (dim in dimensions) {
             # Extract p-value using Type III ANOVA
             p_val <- NA_real_
             an_tab <- tryCatch({ anova(model, type = 3) }, error = function(e) NULL)
-            
+
             if (!is.null(an_tab)) {
                 # Find the p-value column (usually "Pr(>F)")
                 p_col <- grep("^Pr\\(>F\\)$", colnames(an_tab), value = TRUE)
@@ -140,7 +144,33 @@ for (dim in dimensions) {
                     }
                 }
             }
-            
+
+            # Extract point estimate, std. error, and 95% Wald CI (using the
+            # Satterthwaite df from lmerTest) for the phyhealth_var coefficient.
+            # Binary factors (contr.sum, 2 levels) get a single coefficient
+            # named "<var>1" rather than "<var>".
+            coef_row_name <- phyhealth_var
+            if (!(coef_row_name %in% rownames(model_table)) &&
+                paste0(phyhealth_var, "1") %in% rownames(model_table)) {
+                coef_row_name <- paste0(phyhealth_var, "1")
+            }
+
+            estimate <- NA_real_
+            std_error <- NA_real_
+            ci_lower <- NA_real_
+            ci_upper <- NA_real_
+
+            if (coef_row_name %in% rownames(model_table)) {
+                estimate <- suppressWarnings(as.numeric(model_table[coef_row_name, "Estimate"]))
+                std_error <- suppressWarnings(as.numeric(model_table[coef_row_name, "Std. Error"]))
+                coef_df <- suppressWarnings(as.numeric(model_table[coef_row_name, "df"]))
+                if (!is.na(estimate) && !is.na(std_error) && !is.na(coef_df)) {
+                    t_crit <- qt(0.975, df = coef_df)
+                    ci_lower <- estimate - t_crit * std_error
+                    ci_upper <- estimate + t_crit * std_error
+                }
+            }
+
             # Record result
             results <- rbind(
                 results,
@@ -148,6 +178,10 @@ for (dim in dimensions) {
                     phyhealth_var = phyhealth_var,
                     var_type = ifelse(phyhealth_var %in% phyhealth_cats, "categorical", "continuous"),
                     N = nrow(sub_data),
+                    estimate = estimate,
+                    std_error = std_error,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper,
                     p_value = p_val,
                     stringsAsFactors = FALSE
                 )
