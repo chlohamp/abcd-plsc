@@ -7,26 +7,33 @@ library("dplyr")
 options(contrasts = c("contr.sum", "contr.poly"))
 
 # Base directory for regression analyses
-reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/regression"
+reg_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/regression"
 dimensions <- c("dim1", "dim3")
 score <- "score"  # This is our bootstrap ratio outcome variable
 
 # Level-1 Predictors
 categorical_vars <- c("demo_sex_v2", "demo_prnt_gender_id_v2", "demo_origin_v2", "mri_info_manufacturer")
-numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion") 
-phyhealth_vars <- c(
+numerical_vars <- c("interview_age", "demo_prnt_age_v2", "demo_prnt_ed_v2_2yr_l", "demo_prtnr_ed_v2_2yr_l", "demo_comb_income_v2", "rsfmri_meanmotion")
+# Candidate phyhealth predictors. Not every variable is present for every
+# dimension's data file (e.g. BMI is missing from dim1's data but present in
+# dim3's) - the actual list used per dimension is the intersection with that
+# dimension's columns, computed inside the loop below.
+phyhealth_vars_all <- c(
     "BMI",
     "mctq_sdweek_calc",
+    "mctq_msfsc_calc",
+    "resp_wheeze_yn_y",
+    "resp_pmcough_yn_y",
+    "resp_diagnosis_yn_y",
+    "resp_bronch_yn_y",
+    "blood_pressure_sys_mean",
+    "blood_pressure_dia_mean",
     "physical_activity1_y",
     "cbcl_scr_syn_internal_t",
-    "cbcl_scr_syn_external_t",
-    "blood_pressure_mean",
-    "resp_composite",
-    "sleep_chrono", 
-    "delta_weight"
+    "cbcl_scr_syn_external_t"
 )
 
-phyhealth_cats <- c("sleep_chrono", "delta_weight")
+phyhealth_cats <- c("resp_wheeze_yn_y", "resp_pmcough_yn_y", "resp_diagnosis_yn_y", "resp_bronch_yn_y")
 
 for (dim in dimensions) {
     message(sprintf("\nProcessing %s...", dim))
@@ -36,19 +43,41 @@ for (dim in dimensions) {
         phyhealth_var = character(),
         var_type = character(),
         N = integer(),
+        estimate = numeric(),
+        std_error = numeric(),
+        ci_lower = numeric(),
+        ci_upper = numeric(),
         p_value = numeric(),
         stringsAsFactors = FALSE
     )
     
     # Load the bootstrap ratio data for this dimension
-    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_latent_data.csv", dim))
+    data_path <- file.path(reg_dir, dim, sprintf("phyhealth_%s_data.csv", dim))
     if (!file.exists(data_path)) {
         message(sprintf("Data file not found for %s: %s", dim, data_path))
         next
     }
     
     data <- read.table(file = data_path, sep = ",", header = TRUE)
-    
+
+    # BMI isn't included in every dimension's pre-built data file (e.g. dim1),
+    # even though it exists per-subject in the master phyhealth file. Merge it
+    # in by src_subject_id when it's missing, rather than skipping it.
+    if (!("BMI" %in% colnames(data))) {
+        phyhealth_master_path <- file.path(reg_dir, "phyhealth-reg.csv")
+        phyhealth_master <- read.table(file = phyhealth_master_path, sep = ",", header = TRUE)
+        n_before <- nrow(data)
+        data <- merge(data, phyhealth_master[, c("src_subject_id", "BMI")], by = "src_subject_id", all.x = TRUE)
+        message(sprintf("  Merged BMI in from %s (%d/%d subjects matched)", phyhealth_master_path, sum(!is.na(data$BMI)), n_before))
+    }
+
+    # Only analyze predictors that actually exist as columns for this dimension
+    phyhealth_vars <- intersect(phyhealth_vars_all, colnames(data))
+    missing_vars <- setdiff(phyhealth_vars_all, colnames(data))
+    if (length(missing_vars) > 0) {
+        message(sprintf("  Skipping (not present in %s data): %s", dim, paste(missing_vars, collapse = ", ")))
+    }
+
     for (phyhealth_var in phyhealth_vars) {
         message(sprintf("  Analyzing %s...", phyhealth_var))
         
@@ -99,7 +128,7 @@ for (dim in dimensions) {
             # Extract p-value using Type III ANOVA
             p_val <- NA_real_
             an_tab <- tryCatch({ anova(model, type = 3) }, error = function(e) NULL)
-            
+
             if (!is.null(an_tab)) {
                 # Find the p-value column (usually "Pr(>F)")
                 p_col <- grep("^Pr\\(>F\\)$", colnames(an_tab), value = TRUE)
@@ -115,7 +144,33 @@ for (dim in dimensions) {
                     }
                 }
             }
-            
+
+            # Extract point estimate, std. error, and 95% Wald CI (using the
+            # Satterthwaite df from lmerTest) for the phyhealth_var coefficient.
+            # Binary factors (contr.sum, 2 levels) get a single coefficient
+            # named "<var>1" rather than "<var>".
+            coef_row_name <- phyhealth_var
+            if (!(coef_row_name %in% rownames(model_table)) &&
+                paste0(phyhealth_var, "1") %in% rownames(model_table)) {
+                coef_row_name <- paste0(phyhealth_var, "1")
+            }
+
+            estimate <- NA_real_
+            std_error <- NA_real_
+            ci_lower <- NA_real_
+            ci_upper <- NA_real_
+
+            if (coef_row_name %in% rownames(model_table)) {
+                estimate <- suppressWarnings(as.numeric(model_table[coef_row_name, "Estimate"]))
+                std_error <- suppressWarnings(as.numeric(model_table[coef_row_name, "Std. Error"]))
+                coef_df <- suppressWarnings(as.numeric(model_table[coef_row_name, "df"]))
+                if (!is.na(estimate) && !is.na(std_error) && !is.na(coef_df)) {
+                    t_crit <- qt(0.975, df = coef_df)
+                    ci_lower <- estimate - t_crit * std_error
+                    ci_upper <- estimate + t_crit * std_error
+                }
+            }
+
             # Record result
             results <- rbind(
                 results,
@@ -123,6 +178,10 @@ for (dim in dimensions) {
                     phyhealth_var = phyhealth_var,
                     var_type = ifelse(phyhealth_var %in% phyhealth_cats, "categorical", "continuous"),
                     N = nrow(sub_data),
+                    estimate = estimate,
+                    std_error = std_error,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper,
                     p_value = p_val,
                     stringsAsFactors = FALSE
                 )

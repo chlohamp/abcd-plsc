@@ -43,14 +43,14 @@ library(kableExtra)
 
 ```{r}
 # load datasets
-covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/covariate.csv")
-socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-socio.csv")
-rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/clean-rsfc.csv")
+covar_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/covariate.csv")
+socio_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/clean-socio.csv")
+rsfc_df <- read_csv("/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/clean-rsfc.csv")
 
 
-fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion/figures/"
+fig_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory/figures/"
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
-out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-motion"
+out_dir <- "/Users/chloehampson/Desktop/abcd-plsc/derivatives/none-reduced-no_auditory"
 
 
 ```
@@ -141,9 +141,7 @@ corr <- paste0(fig_dir, "correlation_plot.png")
 
 
 # Create the plot
-png(corr, width = 1200, height = 800, res = 300) # Increase res to 300 dpi
-
-
+png(corr, width = 1600, height = 400, res = 300) # Increase res to 300 dpi
 
 # for full
 corrplot(XY.cor.pearson,
@@ -387,6 +385,32 @@ print(paste("Selected dimension:", laDim))
 # Bootstrap ratios plots for dimensions 1 and 3
 dimensions_to_plot <- c(1, 2, 3, 4)
 
+# Colors are keyed by VARIABLE NAME (not row position), so they stay attached
+# to the correct variable no matter what order the bars are plotted in.
+socio_color_map <- setNames(rep("black", ncol(data2)), colnames(data2))
+socio_color_map["COI"]   <- "#6FBFE1"
+socio_color_map["NDI"]   <- "#9BF1FE"
+socio_color_map["FO-C"]  <- "#90CEC1"
+socio_color_map["EIE-C"] <- "#90CEC1"
+socio_color_map["FR-C"]  <- "#BCE3C8"
+socio_color_map["EIC-C"] <- "#BCE3C8"
+socio_color_map["HA-C"]  <- "#D2F3D8"
+
+# Desired x-axis order for the sociocultural (BR.J) plot:
+# Youth-report block, then Caregiver-report block, then neighborhood/environment block
+socio_order <- c(
+  "EIE-Y", "EIC-Y", "HA-Y", "USA-Y", "FS-Y", "FO-Y", "FR-Y",
+  "EIE-C", "EIC-C", "HA-C", "USA-C", "FS-C", "FO-C", "FR-C",
+  "PD", "CCoh", "CCon", "COI", "NDI", "GGS"
+)
+
+# Reorder BR.J's rows and pull colors in that same order - since both are
+# indexed by the same `socio_order` vector, they can never get out of sync.
+BR.J <- BR.J[socio_order, , drop = FALSE]
+socio_colors <- unname(socio_color_map[socio_order])
+
+rsfc_colors <- rep("black", nrow(BR.I))
+
 for (dim in dimensions_to_plot) {
   cat("Creating bootstrap ratio plots for Dimension", dim, "\n")
   
@@ -394,9 +418,12 @@ for (dim in dimensions_to_plot) {
   png(file.path(fig_dir, paste0("Bootstrap_Ratio_BRI_Dim", dim, ".png")), 
       width = 2000, height = 1200, res = 200)
   
+  thr <- 3
+
   plot_BRI <- PrettyBarPlot2(BR.I[, dim],
-    threshold = 3,
+    threshold = thr,
     font.size = 4,
+    color4bar = rsfc_colors,
     ylab = "Bootstrap ratios"
   ) + ggtitle(paste0("Component ", dim), subtitle = "Brain Networks (RSFC)")
   
@@ -410,6 +437,7 @@ for (dim in dimensions_to_plot) {
   plot_BRJ <- PrettyBarPlot2(BR.J[, dim],
     threshold = 3,
     font.size = 4,
+    color4bar = socio_colors,
     ylab = "Bootstrap ratios"
   ) + ggtitle(paste0("Component ", dim), subtitle = "Sociocultural Variables")
   
